@@ -298,13 +298,14 @@ public interface OrdermgmtRepository extends PagingAndSortingRepository<Ordermgm
 - 적용 후 Rest API의 테스트
 ```
 # ordermgmts 결제 후 주문처리
-http localhost:8082/ordermgmts orderId=1 itemId=1 itemName="ITbook" orderStatus="order"
+http localhost:8082/ordermgmts orderId=1 itemId=1 itemName="ITbook" qty=1 customerName="HanYongSun" deliveryAddress="kyungkido sungnamsi" deliveryPhoneNumber="01012341234" orderStatus="order"
+![image](https://user-images.githubusercontent.com/78421066/124928302-74f6fa00-e03a-11eb-9f8d-bc3ead8797c0.png)
+
 
 # ordermgmts 주문 취소하기 PATCH 
 http PATCH localhost:8082/ordermgmts/1 orderStatus="cancel"
+![image](https://user-images.githubusercontent.com/78421066/124928631-ba1b2c00-e03a-11eb-8ab5-48e1b7bb8002.png)
 
-# ordermgmts 주문 상태 확인
-http PATCH localhost:8082/ordermgmts/1
 ```
 
 ## 이벤트 드리븐 아키텍처 구현
@@ -319,7 +320,7 @@ http PATCH localhost:8082/ordermgmts/1
         System.out.println("\n\n##### listener CancelOrder : " + orderCanceled.toJson() + "\n\n");
 
         // 결제 취소시 상태 UPDATE 필요
-        ordermgmtRepository.findById(orderCanceled.**getOrderId()**).ifPresent(ordermgmt->{
+        ordermgmtRepository.findById(orderCanceled.getOrderId()).ifPresent(ordermgmt->{
             ordermgmtRepository.save(ordermgmt);
         });
     }
