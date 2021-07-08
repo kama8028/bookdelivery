@@ -299,11 +299,17 @@ public interface OrdermgmtRepository extends PagingAndSortingRepository<Ordermgm
 ```
 # ordermgmts 결제 후 주문처리
 http localhost:8082/ordermgmts orderId=1 itemId=1 itemName="ITbook" qty=1 customerName="HanYongSun" deliveryAddress="kyungkido sungnamsi" deliveryPhoneNumber="01012341234" orderStatus="order"
-  <img src=" https://user-images.githubusercontent.com/78421066/124928302-74f6fa00-e03a-11eb-9f8d-bc3ead8797c0.png"  width="80%" height="80%">
+  <img src="https://user-images.githubusercontent.com/78421066/124928302-74f6fa00-e03a-11eb-9f8d-bc3ead8797c0.png"  width="80%" height="80%">
+  
+  <img src="https://user-images.githubusercontent.com/85722733/124441079-48cb4700-ddb6-11eb-8d12-57845e061f62.png"  width="80%" height="80%">
 
 # ordermgmts 주문 취소하기 PATCH 
 http PATCH localhost:8082/ordermgmts/1 orderStatus="cancel"
   <img src="https://user-images.githubusercontent.com/78421066/124928631-ba1b2c00-e03a-11eb-8ab5-48e1b7bb8002.png"  width="80%" height="80%">
+  
+  ![주문 취소하기 PATCH](https://user-images.githubusercontent.com/78421066/124930466-51cd4a00-e03c-11eb-8e51-dde99b815e50.png)
+
+  
 ```
 
 ## 이벤트 드리븐 아키텍처 구현
