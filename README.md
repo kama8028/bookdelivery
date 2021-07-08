@@ -296,7 +296,7 @@ public interface OrdermgmtRepository extends PagingAndSortingRepository<Ordermgm
 ```
 
 - 적용 후 Rest API의 테스트
-```
+
 # ordermgmts 결제 후 주문처리
 http localhost:8082/ordermgmts orderId=1 itemId=1 itemName="ITbook" qty=1 customerName="HanYongSun" deliveryAddress="kyungkido sungnamsi" deliveryPhoneNumber="01012341234" orderStatus="order"
 
@@ -304,8 +304,6 @@ http localhost:8082/ordermgmts orderId=1 itemId=1 itemName="ITbook" qty=1 custom
 http PATCH localhost:8082/ordermgmts/1 orderStatus="cancel"
 ![patch](https://user-images.githubusercontent.com/78421066/124938638-6d881e80-e043-11eb-953d-ea412a2fdf91.PNG)
   
-```
-
 ## 이벤트 드리븐 아키텍처 구현
 
 - 카프카를 이용하여 PubSub으로 서비스를 연동하였다. 또한 폴리시 처리시 getOrderId()를 호출하여 Correlation-key 연결을 하였다.
