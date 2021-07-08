@@ -13,6 +13,7 @@ Lv.2 Intensive Coursework Group 3
   - [분석/설계](#분석설계)
   - [구현:](#구현)
     - [DDD 의 적용](#DDD-의-적용)
+    - [이벤트 드리븐 아키텍처](#이벤트-드리븐-아키텍처-구현)
     - [폴리글랏 퍼시스턴스](#폴리글랏-퍼시스턴스)
     - [폴리글랏 프로그래밍](#폴리글랏-프로그래밍)
     - [동기식 호출 과 Fallback 처리](#동기식-호출-과-Fallback-처리)
@@ -304,4 +305,22 @@ http PATCH localhost:8082/ordermgmts/1 orderStatus="cancel"
 
 # ordermgmts 주문 상태 확인
 http PATCH localhost:8082/ordermgmts/1
+```
+
+## 이벤트 드리븐 아키텍쳐 구현
+
+- 카프카를 이용하여 PubSub으로 서비스를 연동하였다. 또한 폴리시 처리시 getOrderId()를 호출하여 Correlation-key 연결을 하였다.
+```
+@StreamListener(KafkaProcessor.INPUT)
+    public void wheneverOrderCanceled_CancelOrder(@Payload OrderCanceled orderCanceled){
+
+        if(!orderCanceled.validate()) return;
+
+        System.out.println("\n\n##### listener CancelOrder : " + orderCanceled.toJson() + "\n\n");
+
+        // 결제 취소시 상태 UPDATE 필요
+        ordermgmtRepository.findById(orderCanceled.**getOrderId()**).ifPresent(ordermgmt->{
+            ordermgmtRepository.save(ordermgmt);
+        });
+    }
 ```
