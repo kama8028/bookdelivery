@@ -200,3 +200,108 @@ Lv.2 Intensive Coursework Group 3
     - 서브 도메인과 바운디드 컨텍스트의 분리:  각 팀의 KPI 별로 아래와 같이 관심 구현 스토리를 나눠가짐
 
 # 구현
+
+분석/설계 단계에서 도출된 헥사고날 아키텍처에 따라, 각 BC별로 대변되는 마이크로 서비스들을 스프링부트로 구현하였다. 구현한 각 서비스를 로컬에서 실행하는 방법은 아래와 같다 (각자의 포트넘버는 8081 ~ 808n 이다)
+
+```
+cd order
+mvn spring-boot:run
+
+cd payment
+mvn spring-boot:run 
+
+cd ordermanagement
+mvn spring-boot:run  
+
+cd delivery
+mvn spring-boot:run 
+```
+
+## DDD 의 적용
+
+- 각 서비스내에 도출된 핵심 Aggregate Root 객체를 Entity로 선언 하였다. 이때 가능한 현업에서 사용하는 언어 (유비쿼터스 랭귀지)를 그대로 사용하려고 노력했다.
+```
+@Entity
+@Table(name="Ordermgmt_table")
+public class Ordermgmt {
+
+    @Id
+    @GeneratedValue(strategy=GenerationType.AUTO)
+    private Long orderMgmtId;
+    private Long orderId;
+    private Long itemId;
+    private String itemName;
+    private Integer qty;
+    private String customerName;
+    private String deliveryAddress;
+    private String deliveryPhoneNumber;
+    private String orderStatus;
+
+    @PostPersist
+    public void onPostPersist(){
+        OrderTaken orderTaken = new OrderTaken();
+        BeanUtils.copyProperties(this, orderTaken);
+        orderTaken.publishAfterCommit();
+    }
+
+    @PostUpdate
+    public void onPostUpdate(){
+        CancelOrderTaken cancelOrderTaken = new CancelOrderTaken();
+        BeanUtils.copyProperties(this, cancelOrderTaken);
+        cancelOrderTaken.publishAfterCommit();
+    }
+
+    public Long getOrderMgmtId() {
+        return orderMgmtId;
+    }
+
+    public void setOrderMgmtId(Long orderMgmtId) {
+        this.orderMgmtId = orderMgmtId;
+    }
+
+    public Long getOrderId() {
+        return orderId;
+    }
+
+    public void setOrderId(Long orderId) {
+        this.orderId = orderId;
+    }
+
+    public Long getItemId() {
+        return itemId;
+    }
+
+    public void setItemId(Long itemId) {
+        this.itemId = itemId;
+    }
+
+    public String getItemName() {
+        return itemName;
+    }
+    .... 생략
+```
+
+- Entity Pattern 과 Repository Pattern 을 적용하여 JPA 를 통하여 다양한 데이터소스 유형 (RDB or NoSQL) 에 대한 별도의 처리가 없도록 데이터 접근 어댑터를 자동 생성하기 위하여 Spring Data REST 의 RestRepository 를 적용하였다 
+```
+package bookdelivery;
+
+import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.rest.core.annotation.RepositoryRestResource;
+
+@RepositoryRestResource(collectionResourceRel="ordermgmts", path="ordermgmts")
+public interface OrdermgmtRepository extends PagingAndSortingRepository<Ordermgmt, Long>{
+
+}
+```
+
+- 적용 후 Rest API의 테스트
+```
+# ordermgmts 결제 후 주문처리
+http localhost:8082/ordermgmts orderId=1 itemId=1 itemName="ITbook" orderStatus="order"
+
+# ordermgmts 주문 취소하기 PATCH 
+http PATCH localhost:8082/ordermgmts/1 orderStatus="cancel"
+
+# ordermgmts 주문 상태 확인
+http PATCH localhost:8082/ordermgmts/1
+```
