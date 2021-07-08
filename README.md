@@ -302,7 +302,7 @@ http localhost:8082/ordermgmts orderId=1 itemId=1 itemName="ITbook" qty=1 custom
 
 # ordermgmts 주문 취소하기 PATCH 
 http PATCH localhost:8082/ordermgmts/1 orderStatus="cancel"
-![image](https://user-images.githubusercontent.com/78421066/124931316-0ebfa680-e03d-11eb-94f1-1d1ac70c5b8f.png)
+![patch](https://user-images.githubusercontent.com/78421066/124937959-d3c07180-e042-11eb-9764-087008bb2d75.PNG)
   
 ```
 
