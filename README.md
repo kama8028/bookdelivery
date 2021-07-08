@@ -199,3 +199,4 @@ Lv.2 Intensive Coursework Group 3
     - 호출관계에서 Pub/Sub 과 Req/Resp 를 구분함
     - 서브 도메인과 바운디드 컨텍스트의 분리:  각 팀의 KPI 별로 아래와 같이 관심 구현 스토리를 나눠가짐
 
+# 구현
