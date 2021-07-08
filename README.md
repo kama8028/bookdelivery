@@ -306,7 +306,8 @@ ordermgmts 주문 취소하기 PATCH
 ```
 http PATCH localhost:8082/ordermgmts/1 orderStatus="cancel"
 ```
-![patch](https://user-images.githubusercontent.com/78421066/124938638-6d881e80-e043-11eb-953d-ea412a2fdf91.PNG)
+![image](https://user-images.githubusercontent.com/78421066/124940062-9b219780-e044-11eb-92d5-579178b767bd.png)
+
   
 ## 이벤트 드리븐 아키텍처 구현
 
