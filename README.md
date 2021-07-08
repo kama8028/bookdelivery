@@ -307,7 +307,7 @@ http PATCH localhost:8082/ordermgmts/1 orderStatus="cancel"
 http PATCH localhost:8082/ordermgmts/1
 ```
 
-## 이벤트 드리븐 아키텍쳐 구현
+## 이벤트 드리븐 아키텍처 구현
 
 - 카프카를 이용하여 PubSub으로 서비스를 연동하였다. 또한 폴리시 처리시 getOrderId()를 호출하여 Correlation-key 연결을 하였다.
 ```
