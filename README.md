@@ -220,7 +220,8 @@ mvn spring-boot:run
 
 ## DDD 의 적용
 
-- 각 서비스내에 도출된 핵심 Aggregate Root 객체를 Entity로 선언 하였다. 이때 가능한 현업에서 사용하는 언어 (유비쿼터스 랭귀지)를 그대로 사용하려고 노력했다.
+- Entity Pattern 과 Repository Pattern 을 적용하여 JPA 를 통하여 데이터 접근 어댑터를 개발하였는가? 분석단계에서의 유비쿼터스 랭귀지 (업무현장에서 쓰는 용어) 를 사용하여 소스코드가 서술되었는가?
+각 서비스내에 도출된 핵심 Aggregate Root 객체를 Entity로 선언 하였다. 이때 가능한 현업에서 사용하는 언어 (유비쿼터스 랭귀지)를 그대로 사용하려고 노력했다.
 ```
 @Entity
 @Table(name="Ordermgmt_table")
@@ -296,6 +297,7 @@ public interface OrdermgmtRepository extends PagingAndSortingRepository<Ordermgm
 ```
 
 - 적용 후 Rest API의 테스트
+
 ordermgmts 결제 후 주문처리
 ```
 http localhost:8082/ordermgmts orderId=1 itemId=1 itemName="ITbook" qty=1 customerName="HanYongSun" deliveryAddress="kyungkido sungnamsi" deliveryPhoneNumber="01012341234" orderStatus="order"
@@ -311,7 +313,9 @@ http PATCH localhost:8082/ordermgmts/1 orderStatus="cancel"
   
 ## 이벤트 드리븐 아키텍처 구현
 
-- 카프카를 이용하여 PubSub으로 서비스를 연동하였다. 또한 폴리시 처리시 getOrderId()를 호출하여 Correlation-key 연결을 하였다.
+- 카프카를 이용하여 PubSub 으로 하나 이상의 서비스가 연동되었는가?, Correlation-key: 각 이벤트 건 (메시지)가 어떠한 폴리시를 처리할때 어떤 건에 연결된 처리건인지를 구별하기 위한 Correlation-key 연결을 제대로 구현 하였는가?
+
+카프카를 이용하여 PubSub으로 서비스를 연동하였다. 또한 폴리시 처리시 getOrderId()를 호출하여 Correlation-key 연결을 하였다.
 ```
 @StreamListener(KafkaProcessor.INPUT)
     public void wheneverOrderCanceled_CancelOrder(@Payload OrderCanceled orderCanceled){
@@ -320,9 +324,70 @@ http PATCH localhost:8082/ordermgmts/1 orderStatus="cancel"
 
         System.out.println("\n\n##### listener CancelOrder : " + orderCanceled.toJson() + "\n\n");
 
-        // 결제 취소시 상태 UPDATE 필요
+        // 결제 취소시 상태 UPDATE 필요, Correlation-key 연결
         ordermgmtRepository.findById(orderCanceled.getOrderId()).ifPresent(ordermgmt->{
             ordermgmtRepository.save(ordermgmt);
         });
     }
 ```
+
+- Message Consumer 마이크로서비스가 장애상황에서 수신받지 못했던 기존 이벤트들을 다시 수신받아 처리하는가?
+
+ordermanagement 서비스만 구동되고 delivery 서비스는 멈춰있는 상태이다. 주문관리에 이벤트가 발생하면 카프카 큐에 정상적으로 들어감을 확인 할 수 있다.
+```
+주문관리 이벤트 생성
+$ http localhost:8082/ordermgmts orderId=1 itemId=1 itemName="ITbook" qty=1 customerName="HanYongSun" deliveryAddress="kyungkido sungnamsi" deliveryPhoneNumber="01012341234" orderStatus="order"
+HTTP/1.1 201
+Content-Type: application/json;charset=UTF-8
+Date: Thu, 08 Jul 2021 23:16:56 GMT
+Location: http://localhost:8082/ordermgmts/1
+Transfer-Encoding: chunked
+
+{
+    "_links": {
+        "ordermgmt": {
+            "href": "http://localhost:8082/ordermgmts/1"
+        },
+        "self": {
+            "href": "http://localhost:8082/ordermgmts/1"
+        }
+    },
+    "customerName": "HanYongSun",
+    "deliveryAddress": "kyungkido sungnamsi",
+    "deliveryPhoneNumber": "01012341234",
+    "itemId": 1,
+    "itemName": "ITbook",
+    "orderId": 1,
+    "orderStatus": "order",
+    "qty": 1
+}
+```
+카프카 Consumer 캡쳐
+![image](https://user-images.githubusercontent.com/78421066/125002634-5d4a6080-e090-11eb-8e55-994bf1c64a33.png)
+
+
+배송(delivery)서비스 실행 및 실행 후 카프카에 적재된 메세지 수신 확인
+```
+cd delivery
+mvn spring-boot:run
+
+##### listener StartDelivery : {"eventType":"OrderTaken","timestamp":"20210709081656","orderMgmtId":1,"orderId":1,"itemId":1,"itemName":"ITbook","qty":1,"customerName":"HanYongSun","deliveryAddress":"kyungkido sungnamsi","del
+iveryPhoneNumber":"01012341234","orderStatus":"order"}
+
+
+Hibernate:
+    call next value for hibernate_sequence
+Hibernate:
+    insert
+    into
+        delivery_table
+        (customer_name, delivery_address, delivery_phone_number, order_id, order_status, delivery_id)
+    values
+        (?, ?, ?, ?, ?, ?)
+```
+카프카 Consumer 캡쳐
+![image](https://user-images.githubusercontent.com/78421066/125002840-ca5df600-e090-11eb-992c-ed72ee7cfca8.png)
+
+
+
+
