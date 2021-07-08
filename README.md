@@ -296,12 +296,16 @@ public interface OrdermgmtRepository extends PagingAndSortingRepository<Ordermgm
 ```
 
 - 적용 후 Rest API의 테스트
-
-# ordermgmts 결제 후 주문처리
+ordermgmts 결제 후 주문처리
+```
 http localhost:8082/ordermgmts orderId=1 itemId=1 itemName="ITbook" qty=1 customerName="HanYongSun" deliveryAddress="kyungkido sungnamsi" deliveryPhoneNumber="01012341234" orderStatus="order"
+```
+![image](https://user-images.githubusercontent.com/78421066/124939757-5b5ab000-e044-11eb-808b-2f610e6a6677.png)
 
-# ordermgmts 주문 취소하기 PATCH 
+ordermgmts 주문 취소하기 PATCH 
+```
 http PATCH localhost:8082/ordermgmts/1 orderStatus="cancel"
+```
 ![patch](https://user-images.githubusercontent.com/78421066/124938638-6d881e80-e043-11eb-953d-ea412a2fdf91.PNG)
   
 ## 이벤트 드리븐 아키텍처 구현
