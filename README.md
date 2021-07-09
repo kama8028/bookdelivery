@@ -436,4 +436,54 @@ Hibernate:
 ## API 게이트웨이
 
 - API GW를 통하여 마이크로 서비스들의 집입점을 통일할 수 있는가?
+
+아래는 MSAEZ를 통해 자동 생성된 gateway 서비스의 application.yml이며, URL Path에 따라서 마이크로서비스별 서로 다른 포트로 라우팅시키도록 설정되었다.
+
+gateway 서비스의 application.yml 파일 
+
+```
+server:
+  port: 8088
+
+---
+
+spring:
+  profiles: default
+  cloud:
+    gateway:
+      routes:
+        - id: order
+          uri: http://localhost:8081
+          predicates:
+            - Path=/orders/**, /myPages/**
+        - id: ordermanagement
+          uri: http://localhost:8082
+          predicates:
+            - Path=/ordermgmts/** 
+        - id: delivery
+          uri: http://localhost:8083
+          predicates:
+            - Path=/deliveries/** 
+        - id: payment
+          uri: http://localhost:8084
+          predicates:
+            - Path=/payments/** 
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins:
+              - "*"
+            allowedMethods:
+              - "*"
+            allowedHeaders:
+              - "*"
+            allowCredentials: true
+
+---
+```
+
+Gateway 포트인 8088을 통해서 주문을 생성시켜 8081 포트에서 서비스되고 있는 주문서비스(order)가 정상 동작함을 확인함
+
+![GW2](https://user-images.githubusercontent.com/85722733/125040735-f13d1c00-e0d2-11eb-9a60-e2f1ba6a5e51.png)
+
 - 게이트웨이와 인증서버(OAuth), JWT 토큰 인증을 통하여 마이크로서비스들을 보호할 수 있는가?
