@@ -388,6 +388,34 @@ Hibernate:
 카프카 Consumer 캡쳐
 ![image](https://user-images.githubusercontent.com/78421066/125002840-ca5df600-e090-11eb-992c-ed72ee7cfca8.png)
 
+- Scaling-out: Message Consumer 마이크로서비스의 Replica 를 추가했을때 중복없이 이벤트를 수신할 수 있는가?
+
+배송(delievery)서비스의 포트 추가(기존:8083, 추가:8093)하여 2개의 노드로 배송서비스를 실행한다. bookdelivery topic의 partition은 1개이기 때문에 기존 8083 포트의 서비스만 partition을 할당받았다.
+![image](https://user-images.githubusercontent.com/78421066/125025551-d14f2d80-e0bd-11eb-8687-2fcf00df9593.png
+
+주문관리서비스(ordermanagement)에서 이벤트가 발생하면 8083포트에 있는 delivery서비스에게만 이벤트 메세지가 수신되게 된다.
+```
+##### listener StartDelivery : {"eventType":"OrderTaken","timestamp":"20210709140205","orderMgmtId":6,"orderId":1,"
+itemId":1,"itemName":"ITbook","qty":1,"customerName":"HanYongSun","deliveryAddress":"kyungkido sungnamsi","delivery
+PhoneNumber":"01012341234","orderStatus":"order"}
 
 
+Hibernate:
+    call next value for hibernate_sequence
+Hibernate:
+    insert
+    into
+        delivery_table
+        (customer_name, delivery_address, delivery_phone_number, order_id, order_status, delivery_id)
+    values
+        (?, ?, ?, ?, ?, ?)
+```
 
+8093포트의 delivery서비스의 경우 메세지를 수신받지 못한다.
+
+```
+변동사항 없음
+```
+
+8083 포트를 중지 시키면 8093포트의 delivery 서비스에서 partition을 할당 받는다
+![image](https://user-images.githubusercontent.com/78421066/125026249-1fb0fc00-e0bf-11eb-9af2-d9888005c67a.png)
