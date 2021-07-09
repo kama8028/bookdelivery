@@ -221,8 +221,11 @@ mvn spring-boot:run
 
 ## DDD 의 적용
 
-- Entity Pattern 과 Repository Pattern 을 적용하여 JPA 를 통하여 데이터 접근 어댑터를 개발하였는가? 분석단계에서의 유비쿼터스 랭귀지 (업무현장에서 쓰는 용어) 를 사용하여 소스코드가 서술되었는가?
-각 서비스내에 도출된 핵심 Aggregate Root 객체를 Entity로 선언 하였다. 이때 가능한 현업에서 사용하는 언어 (유비쿼터스 랭귀지)를 그대로 사용하려고 노력했다.
+- Entity Pattern 과 Repository Pattern 을 적용하여 JPA 를 통하여 데이터 접근 어댑터를 개발하였는가? 
+
+각 서비스 내에 도출된 핵심 Aggregate Root 객체를 Entity로 선언하였다. (주문(order), 결제(payment), 주문관리(ordermgmt), 배송(delivery))
+
+주문관리 Entity (Ordermgmt.java)
 ```
 @Entity
 @Table(name="Ordermgmt_table")
@@ -284,7 +287,9 @@ public class Ordermgmt {
     .... 생략
 ```
 
-- Entity Pattern 과 Repository Pattern 을 적용하여 JPA 를 통하여 다양한 데이터소스 유형 (RDB or NoSQL) 에 대한 별도의 처리가 없도록 데이터 접근 어댑터를 자동 생성하기 위하여 Spring Data REST 의 RestRepository 를 적용하였다 
+Entity Pattern 과 Repository Pattern 을 적용하여 JPA 를 통하여 다양한 데이터소스 유형 (RDB or NoSQL) 에 대한 별도의 처리가 없도록 데이터 접근 어댑터를 자동 생성하기 위하여 Spring Data REST 의 RestRepository 를 적용하였다 
+
+OrdermgmtRepository.java
 ```
 package bookdelivery;
 
@@ -296,6 +301,14 @@ public interface OrdermgmtRepository extends PagingAndSortingRepository<Ordermgm
 
 }
 ```
+- REST Inbound adaptor 이외에 gRPC 등의 Inbound Adaptor 를 추가함에 있어서 도메인 모델의 손상을 주지 않고 새로운 프로토콜에 기존 구현체를 적응시킬 수 있는가? 
+```
+미구현
+```
+
+- 분석단계에서의 유비쿼터스 랭귀지 (업무현장에서 쓰는 용어) 를 사용하여 소스코드가 서술되었는가?
+
+가능한 현업에서 사용하는 언어(유비쿼터스 랭귀지)를 모델링 및 구현 시 그대로 사용하려고 노력하였다.
 
 - 적용 후 Rest API의 테스트
 
@@ -314,7 +327,7 @@ http PATCH localhost:8082/ordermgmts/1 orderStatus="cancel"
   
 ## 이벤트 드리븐 아키텍처 구현
 
-- 카프카를 이용하여 PubSub 으로 하나 이상의 서비스가 연동되었는가?, 
+- 카프카를 이용하여 PubSub 으로 하나 이상의 서비스가 연동되었는가?
 - Correlation-key: 각 이벤트 건 (메시지)가 어떠한 폴리시를 처리할때 어떤 건에 연결된 처리건인지를 구별하기 위한 Correlation-key 연결을 제대로 구현 하였는가?
 
 카프카를 이용하여 주문완료 시 결제 처리를 제외한 나머지 모든 마이크로서비스 트랜잭션은 Pub/Sub 관계로 구현하였다. 
@@ -349,6 +362,50 @@ public class PolicyHandler{
         });
     }
 ```
+
+
+- Scaling-out: Message Consumer 마이크로서비스의 Replica 를 추가했을때 중복없이 이벤트를 수신할 수 있는가?
+
+배송(delievery)서비스의 포트 추가(기존:8083, 추가:8093)하여 2개의 노드로 배송서비스를 실행한다. bookdelivery topic의 partition은 1개이기 때문에 기존 8083 포트의 서비스만 partition이 할당된다.
+![image](https://user-images.githubusercontent.com/78421066/125026479-a534ac00-e0bf-11eb-878c-0a4e6cf3c5d9.png)
+
+
+주문관리서비스(ordermanagement)에서 이벤트가 발생하면 8083포트에 있는 delivery서비스에게만 이벤트 메세지가 수신되게 된다.
+```
+##### listener StartDelivery : {"eventType":"OrderTaken","timestamp":"20210709140205","orderMgmtId":6,"orderId":1,"
+itemId":1,"itemName":"ITbook","qty":1,"customerName":"HanYongSun","deliveryAddress":"kyungkido sungnamsi","delivery
+PhoneNumber":"01012341234","orderStatus":"order"}
+
+
+Hibernate:
+    call next value for hibernate_sequence
+Hibernate:
+    insert
+    into
+        delivery_table
+        (customer_name, delivery_address, delivery_phone_number, order_id, order_status, delivery_id)
+    values
+        (?, ?, ?, ?, ?, ?)
+```
+
+8093포트의 delivery서비스의 경우 메세지를 수신받지 못한다.
+
+```
+변동사항 없음
+```
+
+8083 포트를 중지 시키면 8093포트의 delivery 서비스에서 partition을 할당 받는다
+![image](https://user-images.githubusercontent.com/78421066/125026249-1fb0fc00-e0bf-11eb-9af2-d9888005c67a.png)
+
+- 취소에 따른 보상 트랜잭션을 설계하였는가(Saga Pattern)
+```
+추가필요
+```
+- CQRS: Materialized View 를 구현하여, 타 마이크로서비스의 데이터 원본에 접근없이(Composite 서비스나 조인SQL 등 없이) 도 내 서비스의 화면 구성과 잦은 조회가 가능한가?
+```
+추가필요
+```
+
 
 - Message Consumer 마이크로서비스가 장애상황에서 수신받지 못했던 기존 이벤트들을 다시 수신받아 처리하는가?
 
@@ -407,48 +464,14 @@ Hibernate:
 카프카 Consumer 캡쳐
 ![image](https://user-images.githubusercontent.com/78421066/125002840-ca5df600-e090-11eb-992c-ed72ee7cfca8.png)
 
-- Scaling-out: Message Consumer 마이크로서비스의 Replica 를 추가했을때 중복없이 이벤트를 수신할 수 있는가?
 
-배송(delievery)서비스의 포트 추가(기존:8083, 추가:8093)하여 2개의 노드로 배송서비스를 실행한다. bookdelivery topic의 partition은 1개이기 때문에 기존 8083 포트의 서비스만 partition을 할당된다.
-![image](https://user-images.githubusercontent.com/78421066/125026479-a534ac00-e0bf-11eb-878c-0a4e6cf3c5d9.png)
-
-
-주문관리서비스(ordermanagement)에서 이벤트가 발생하면 8083포트에 있는 delivery서비스에게만 이벤트 메세지가 수신되게 된다.
-```
-##### listener StartDelivery : {"eventType":"OrderTaken","timestamp":"20210709140205","orderMgmtId":6,"orderId":1,"
-itemId":1,"itemName":"ITbook","qty":1,"customerName":"HanYongSun","deliveryAddress":"kyungkido sungnamsi","delivery
-PhoneNumber":"01012341234","orderStatus":"order"}
-
-
-Hibernate:
-    call next value for hibernate_sequence
-Hibernate:
-    insert
-    into
-        delivery_table
-        (customer_name, delivery_address, delivery_phone_number, order_id, order_status, delivery_id)
-    values
-        (?, ?, ?, ?, ?, ?)
-```
-
-8093포트의 delivery서비스의 경우 메세지를 수신받지 못한다.
-
-```
-변동사항 없음
-```
-
-8083 포트를 중지 시키면 8093포트의 delivery 서비스에서 partition을 할당 받는다
-![image](https://user-images.githubusercontent.com/78421066/125026249-1fb0fc00-e0bf-11eb-9af2-d9888005c67a.png)
-
-- CQRS: Materialized View 를 구현하여, 타 마이크로서비스의 데이터 원본에 접근없이(Composite 서비스나 조인SQL 등 없이) 도 내 서비스의 화면 구성과 잦은 조회가 가능한가?
-
-```
-미구현
-```
 
 ## 폴리글랏 프로그래밍
 
 - 각 마이크로 서비스들이 하나이상의 각자의 기술 Stack 으로 구성되었는가?
+```
+미구현
+```
 - 각 마이크로 서비스들이 각자의 저장소 구조를 자율적으로 채택하고 각자의 저장소 유형 (RDB, NoSQL, File System 등)을 선택하여 구현하였는가?
 
 ## API 게이트웨이
@@ -505,3 +528,6 @@ Gateway 포트인 8088을 통해서 주문을 생성시켜 8081 포트에서 서
 ![GW2](https://user-images.githubusercontent.com/85722733/125040735-f13d1c00-e0d2-11eb-9a60-e2f1ba6a5e51.png)
 
 - 게이트웨이와 인증서버(OAuth), JWT 토큰 인증을 통하여 마이크로서비스들을 보호할 수 있는가?
+```
+미구현
+```
