@@ -390,8 +390,9 @@ Hibernate:
 
 - Scaling-out: Message Consumer 마이크로서비스의 Replica 를 추가했을때 중복없이 이벤트를 수신할 수 있는가?
 
-배송(delievery)서비스의 포트 추가(기존:8083, 추가:8093)하여 2개의 노드로 배송서비스를 실행한다. bookdelivery topic의 partition은 1개이기 때문에 기존 8083 포트의 서비스만 partition을 할당당된다.
-![image](https://user-images.githubusercontent.com/78421066/125025551-d14f2d80-e0bd-11eb-8687-2fcf00df9593.png
+배송(delievery)서비스의 포트 추가(기존:8083, 추가:8093)하여 2개의 노드로 배송서비스를 실행한다. bookdelivery topic의 partition은 1개이기 때문에 기존 8083 포트의 서비스만 partition을 할당된다.
+![image](https://user-images.githubusercontent.com/78421066/125026479-a534ac00-e0bf-11eb-878c-0a4e6cf3c5d9.png)
+
 
 주문관리서비스(ordermanagement)에서 이벤트가 발생하면 8083포트에 있는 delivery서비스에게만 이벤트 메세지가 수신되게 된다.
 ```
