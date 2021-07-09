@@ -314,18 +314,36 @@ http PATCH localhost:8082/ordermgmts/1 orderStatus="cancel"
   
 ## 이벤트 드리븐 아키텍처 구현
 
-- 카프카를 이용하여 PubSub 으로 하나 이상의 서비스가 연동되었는가?, Correlation-key: 각 이벤트 건 (메시지)가 어떠한 폴리시를 처리할때 어떤 건에 연결된 처리건인지를 구별하기 위한 Correlation-key 연결을 제대로 구현 하였는가?
+- 카프카를 이용하여 PubSub 으로 하나 이상의 서비스가 연동되었는가?, 
+- Correlation-key: 각 이벤트 건 (메시지)가 어떠한 폴리시를 처리할때 어떤 건에 연결된 처리건인지를 구별하기 위한 Correlation-key 연결을 제대로 구현 하였는가?
 
-카프카를 이용하여 PubSub으로 서비스를 연동하였다. 또한 폴리시 처리시 getOrderId()를 호출하여 Correlation-key 연결을 하였다.
+카프카를 이용하여 주문완료 시 결제 처리를 제외한 나머지 모든 마이크로서비스 트랜잭션은 Pub/Sub 관계로 구현하였다. 
+
+아래는 주문취소 이벤트(OrderCanceled)를 카프카를 통해 주문관리(ordermanagement) 서비스에 연계받는 코드 내용이다. 
+
+order 서비스에서는 PostUpdate로 OrderCanceled 이벤트를 발생시키고,
 ```
-@StreamListener(KafkaProcessor.INPUT)
+public class Order {
+    @PostUpdate
+      public void onPostUpdate(){
+        OrderCanceled orderCanceled = new OrderCanceled();
+        BeanUtils.copyProperties(this, orderCanceled);
+        orderCanceled.publishAfterCommit();
+    }
+```
+
+ordermanagement 서비스에서는 카프카 리스너를 통해 order의 OrderCanceled 이벤트를 수신받아서 폴리시(cancelOrder)처리하였다. (getOrderId()를 호출하여 Correlation-key 연결)
+```
+@Service
+public class PolicyHandler{
+  @StreamListener(KafkaProcessor.INPUT)
     public void wheneverOrderCanceled_CancelOrder(@Payload OrderCanceled orderCanceled){
 
         if(!orderCanceled.validate()) return;
 
         System.out.println("\n\n##### listener CancelOrder : " + orderCanceled.toJson() + "\n\n");
 
-        // 결제 취소시 상태 UPDATE 필요, Correlation-key 연결
+        // 주문 취소시 상태 UPDATE 필요, Correlation-key 연결
         ordermgmtRepository.findById(orderCanceled.getOrderId()).ifPresent(ordermgmt->{
             ordermgmtRepository.save(ordermgmt);
         });
