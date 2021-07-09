@@ -299,9 +299,9 @@ public interface OrdermgmtRepository extends PagingAndSortingRepository<Ordermgm
 
 - 적용 후 Rest API의 테스트
 
-ordermgmts 결제 후 주문처리
+주문 결제 후 ordermgmts 주문 접수하기 POST
 ```
-http localhost:8082/ordermgmts orderId=1 itemId=1 itemName="ITbook" qty=1 customerName="HanYongSun" deliveryAddress="kyungkido sungnamsi" deliveryPhoneNumber="01012341234" orderStatus="order"
+http POST localhost:8082/ordermgmts orderId=1 itemId=1 itemName="ITbook" qty=1 customerName="HanYongSun" deliveryAddress="kyungkido sungnamsi" deliveryPhoneNumber="01012341234" orderStatus="order"
 ```
 ![image](https://user-images.githubusercontent.com/78421066/124939757-5b5ab000-e044-11eb-808b-2f610e6a6677.png)
 
@@ -352,7 +352,7 @@ public class PolicyHandler{
 
 - Message Consumer 마이크로서비스가 장애상황에서 수신받지 못했던 기존 이벤트들을 다시 수신받아 처리하는가?
 
-ordermanagement 서비스만 구동되고 delivery 서비스는 멈춰있는 상태이다. 주문관리에 이벤트가 발생하면 카프카 큐에 정상적으로 들어감을 확인 할 수 있다.
+ordermanagement 서비스만 구동되고 delivery 서비스는 멈춰있는 상태이다. 주문관리에 이벤트가 발생하면 카프카 큐에 정상적으로 들어감을 확인할 수 있다.
 ```
 주문관리 이벤트 생성
 $ http localhost:8082/ordermgmts orderId=1 itemId=1 itemName="ITbook" qty=1 customerName="HanYongSun" deliveryAddress="kyungkido sungnamsi" deliveryPhoneNumber="01012341234" orderStatus="order"
@@ -453,9 +453,9 @@ Hibernate:
 
 ## API 게이트웨이
 
-- API GW를 통하여 마이크로 서비스들의 집입점을 통일할 수 있는가?
+- API GW를 통하여 마이크로 서비스들의 진입점을 통일할 수 있는가?
 
-아래는 MSAEZ를 통해 자동 생성된 gateway 서비스의 application.yml이며, URL Path에 따라서 마이크로서비스별 서로 다른 포트로 라우팅시키도록 설정되었다.
+아래는 MSAEZ를 통해 자동 생성된 gateway 서비스의 application.yml이며, 마이크로서비스들의 진입점을 통일하여 URL Path에 따라서 마이크로서비스별 서로 다른 포트로 라우팅시키도록 설정되었다.
 
 gateway 서비스의 application.yml 파일 
 
