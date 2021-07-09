@@ -314,7 +314,7 @@ public interface OrdermgmtRepository extends PagingAndSortingRepository<Ordermgm
 
 주문 결제 후 ordermgmts 주문 접수하기 POST
 ```
-http POST localhost:8082/ordermgmts orderId=1 itemId=1 itemName="ITbook" qty=1 customerName="HanYongSun" deliveryAddress="kyungkido sungnamsi" deliveryPhoneNumber="01012341234" orderStatus="order"
+http localhost:8082/ordermgmts orderId=1 itemId=1 itemName="ITbook" qty=1 customerName="HanYongSun" deliveryAddress="kyungkido sungnamsi" deliveryPhoneNumber="01012341234" orderStatus="order"
 ```
 ![image](https://user-images.githubusercontent.com/78421066/124939757-5b5ab000-e044-11eb-808b-2f610e6a6677.png)
 
@@ -324,7 +324,25 @@ http PATCH localhost:8082/ordermgmts/1 orderStatus="cancel"
 ```
 ![image](https://user-images.githubusercontent.com/78421066/124940062-9b219780-e044-11eb-92d5-579178b767bd.png)
 
-  
+
+## Request-Response 방식의 서비스 중심 아키텍처 구현
+
+- 마이크로 서비스간 Request-Response 호출에 있어 대상 서비스를 어떠한 방식으로 찾아서 호출 하였는가? (Service Discovery, REST, FeignClient)
+
+요구사항대로 주문이 되어야지만 결제 서비스를 호출할 수 있도록 주문 시 결제 처리를 동기식으로 호출하도록 한다. 이는 FeignClient 를 이용하여 호출하도록 하였다.
+
+PaymentService.java
+
+```
+추가필요
+```
+
+- 서킷브레이커를 통하여  장애를 격리시킬 수 있는가?
+
+```
+추가필요
+```
+
 ## 이벤트 드리븐 아키텍처 구현
 
 - 카프카를 이용하여 PubSub 으로 하나 이상의 서비스가 연동되었는가?
@@ -334,7 +352,7 @@ http PATCH localhost:8082/ordermgmts/1 orderStatus="cancel"
 
 아래는 주문취소 이벤트(OrderCanceled)를 카프카를 통해 주문관리(ordermanagement) 서비스에 연계받는 코드 내용이다. 
 
-order 서비스에서는 PostUpdate로 OrderCanceled 이벤트를 발생시키고,
+order 서비스에서는 고객이 주문 취소 시 PostUpdate로 OrderCanceled 이벤트를 발생시키고,
 ```
 public class Order {
     @PostUpdate
@@ -345,7 +363,7 @@ public class Order {
     }
 ```
 
-ordermanagement 서비스에서는 카프카 리스너를 통해 order의 OrderCanceled 이벤트를 수신받아서 폴리시(cancelOrder)처리하였다. (getOrderId()를 호출하여 Correlation-key 연결)
+ordermanagement 서비스에서는 카프카 리스너를 통해 order의 OrderCanceled 이벤트를 수신받아서 폴리시(cancelOrder) 처리하였다. (getOrderId()를 호출하여 Correlation-key 연결)
 ```
 @Service
 public class PolicyHandler{
@@ -473,6 +491,9 @@ Hibernate:
 미구현
 ```
 - 각 마이크로 서비스들이 각자의 저장소 구조를 자율적으로 채택하고 각자의 저장소 유형 (RDB, NoSQL, File System 등)을 선택하여 구현하였는가?
+```
+추가필요
+```
 
 ## API 게이트웨이
 
