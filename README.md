@@ -420,3 +420,9 @@ Hibernate:
 
 8083 포트를 중지 시키면 8093포트의 delivery 서비스에서 partition을 할당 받는다
 ![image](https://user-images.githubusercontent.com/78421066/125026249-1fb0fc00-e0bf-11eb-9af2-d9888005c67a.png)
+
+- CQRS: Materialized View 를 구현하여, 타 마이크로서비스의 데이터 원본에 접근없이(Composite 서비스나 조인SQL 등 없이) 도 내 서비스의 화면 구성과 잦은 조회가 가능한가?
+
+```
+미구현
+```
