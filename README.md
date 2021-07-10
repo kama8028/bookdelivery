@@ -325,25 +325,7 @@ http PATCH localhost:8082/ordermgmts/1 orderStatus="cancel"
 ![image](https://user-images.githubusercontent.com/78421066/124940062-9b219780-e044-11eb-92d5-579178b767bd.png)
 
 
-## Request-Response 방식의 서비스 중심 아키텍처 구현
-
-- 마이크로 서비스간 Request-Response 호출에 있어 대상 서비스를 어떠한 방식으로 찾아서 호출 하였는가? (Service Discovery, REST, FeignClient)
-
-요구사항대로 주문이 되어야지만 결제 서비스를 호출할 수 있도록 주문 시 결제 처리를 동기식으로 호출하도록 한다. 이는 FeignClient 를 이용하여 호출하도록 하였다.
-
-PaymentService.java
-
-```
-추가필요
-```
-
-- 서킷브레이커를 통하여  장애를 격리시킬 수 있는가?
-
-```
-추가필요
-```
-
-## 이벤트 드리븐 아키텍처 구현
+## 이벤트 드리븐 아키텍처
 
 - 카프카를 이용하여 PubSub 으로 하나 이상의 서비스가 연동되었는가?
 - Correlation-key: 각 이벤트 건 (메시지)가 어떠한 폴리시를 처리할때 어떤 건에 연결된 처리건인지를 구별하기 위한 Correlation-key 연결을 제대로 구현 하였는가?
@@ -483,6 +465,11 @@ Hibernate:
 ![image](https://user-images.githubusercontent.com/78421066/125002840-ca5df600-e090-11eb-992c-ed72ee7cfca8.png)
 
 
+## 폴리글랏 퍼시스턴스
+- 각 마이크로 서비스들이 각자의 저장소 구조를 자율적으로 채택하고 각자의 저장소 유형 (RDB, NoSQL, File System 등)을 선택하여 구현하였는가?
+```
+추가필요
+```
 
 ## 폴리글랏 프로그래밍
 
@@ -490,10 +477,7 @@ Hibernate:
 ```
 미구현
 ```
-- 각 마이크로 서비스들이 각자의 저장소 구조를 자율적으로 채택하고 각자의 저장소 유형 (RDB, NoSQL, File System 등)을 선택하여 구현하였는가?
-```
-추가필요
-```
+
 
 ## API 게이트웨이
 
@@ -625,3 +609,22 @@ http --form POST localhost:8090/oauth/token "Authorization: Basic dWVuZ2luZS1jbG
 http localhost:8088/ordermgmts "Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZGRyZXNzIjoi7ISc7Jq47IucIiwidXNlcl9uYW1lIjoiMUB1ZW5naW5lLm9yZyIsInNjb3BlIjpbInJlYWQiLCJ3cml0ZSIsInRydXN0Il0sIm5pY2tuYW1lIjoi7Jyg7JeU7KeEIiwiY29tcGFueSI6IlVlbmdpbmUiLCJleHAiOjE2MjU5Nzg0NjQsImF1dGhvcml0aWVzIjpbIlVTRVJfQURNSU4iXSwianRpIjoiZ1l6cEltL29RYytucC9iYVZacGZYazNIU3k0PSIsImNsaWVudF9pZCI6InVlbmdpbmUtY2xpZW50In0.Ic56B-RPB4voEPSnQ_IecmSwbgqg2x7FojMFohKvHzMnKzA_6yb72vFs-ay3T7DSyplD22bdHvE1yEYV8oTzAv47srcjS4YLMnM9BDVLartkltfaj-DkXuiNRDbvesIKp4tTv3gFEQ16deocvY9W5Dv-Hkhqk_Hy4SlR2LKdKD2Q5yHDM4kqsNesjPFnRydJqHLgv0l9LIF76VJI5woMFJ8H6mRGE8DKJOvOF2DwItc8MzqgwILQV4WYzw8yRy_CZjR2hDG1wsqqhi1YlQWfgySRrFsaXAYv08h_rMPzudpncNOXM1i9SZlXcX0-BI03GCO6RmLMmo-NonTkSk5JTg"
 ```
 ![image](https://user-images.githubusercontent.com/78421066/125152033-30c44080-e185-11eb-902e-b9151c180b8c.png)
+
+
+## 동기식 호출 과 Fallback 처리 (Request-Response 방식의 서비스 중심 아키텍처 구현)
+
+- 마이크로 서비스간 Request-Response 호출에 있어 대상 서비스를 어떠한 방식으로 찾아서 호출 하였는가? (Service Discovery, REST, FeignClient)
+
+요구사항대로 주문이 되어야지만 결제 서비스를 호출할 수 있도록 주문 시 결제 처리를 동기식으로 호출하도록 한다. 이는 FeignClient 를 이용하여 호출하도록 하였다.
+
+PaymentService.java
+
+```
+추가필요
+```
+
+- 서킷브레이커를 통하여  장애를 격리시킬 수 있는가?
+
+```
+추가필요
+```
