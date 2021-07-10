@@ -13,12 +13,11 @@ Lv.2 Intensive Coursework Group 3
   - [분석/설계](#분석설계)
   - [구현:](#구현)
     - [DDD 의 적용](#DDD-의-적용)
-    - [이벤트 드리븐 아키텍처](#이벤트-드리븐-아키텍처-구현)
+    - [동기식 호출과 Fallback 처리](#동기식-호출과-Fallback-처리)
+    - [비동기식 호출과 Eventual Consistency](#비동기식-호출과-Eventual-Consistency)
     - [폴리글랏 퍼시스턴스](#폴리글랏-퍼시스턴스)
     - [폴리글랏 프로그래밍](#폴리글랏-프로그래밍)
     - [API 게이트웨이](#API-게이트웨이)
-    - [동기식 호출 과 Fallback 처리](#동기식-호출-과-Fallback-처리)
-    - [비동기식 호출 과 Eventual Consistency](#비동기식-호출-과-Eventual-Consistency)
   - [운영](#운영)
     - [CI/CD 설정](#cicd설정)
     - [동기식 호출 / 서킷 브레이킹 / 장애격리](#동기식-호출-서킷-브레이킹-장애격리)
@@ -325,9 +324,30 @@ http PATCH localhost:8082/ordermgmts/1 orderStatus="cancel"
 ![image](https://user-images.githubusercontent.com/78421066/124940062-9b219780-e044-11eb-92d5-579178b767bd.png)
 
 
-## 이벤트 드리븐 아키텍처
+## 동기식 호출과 Fallback 처리 
+(Request-Response 방식의 서비스 중심 아키텍처 구현)
+
+- 마이크로 서비스간 Request-Response 호출에 있어 대상 서비스를 어떠한 방식으로 찾아서 호출 하였는가? (Service Discovery, REST, FeignClient)
+
+요구사항대로 주문이 되어야지만 결제 서비스를 호출할 수 있도록 주문 시 결제 처리를 동기식으로 호출하도록 한다. 이는 FeignClient 를 이용하여 호출하도록 하였다.
+
+PaymentService.java
+
+```
+추가필요
+```
+
+- 서킷브레이커를 통하여  장애를 격리시킬 수 있는가?
+
+```
+추가필요
+```
+
+## 비동기식 호출과 Eventual Consistency 
+(이벤트 드리븐 아키텍처)
 
 - 카프카를 이용하여 PubSub 으로 하나 이상의 서비스가 연동되었는가?
+
 - Correlation-key: 각 이벤트 건 (메시지)가 어떠한 폴리시를 처리할때 어떤 건에 연결된 처리건인지를 구별하기 위한 Correlation-key 연결을 제대로 구현 하였는가?
 
 카프카를 이용하여 주문완료 시 결제 처리를 제외한 나머지 모든 마이크로서비스 트랜잭션은 Pub/Sub 관계로 구현하였다. 
@@ -611,20 +631,4 @@ http localhost:8088/ordermgmts "Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cC
 ![image](https://user-images.githubusercontent.com/78421066/125152033-30c44080-e185-11eb-902e-b9151c180b8c.png)
 
 
-## 동기식 호출 과 Fallback 처리 (Request-Response 방식의 서비스 중심 아키텍처 구현)
 
-- 마이크로 서비스간 Request-Response 호출에 있어 대상 서비스를 어떠한 방식으로 찾아서 호출 하였는가? (Service Discovery, REST, FeignClient)
-
-요구사항대로 주문이 되어야지만 결제 서비스를 호출할 수 있도록 주문 시 결제 처리를 동기식으로 호출하도록 한다. 이는 FeignClient 를 이용하여 호출하도록 하였다.
-
-PaymentService.java
-
-```
-추가필요
-```
-
-- 서킷브레이커를 통하여  장애를 격리시킬 수 있는가?
-
-```
-추가필요
-```
