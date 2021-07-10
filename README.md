@@ -15,8 +15,7 @@ Lv.2 Intensive Coursework Group 3
     - [DDD 의 적용](#DDD-의-적용)
     - [동기식 호출과 Fallback 처리](#동기식-호출과-Fallback-처리)
     - [비동기식 호출과 Eventual Consistency](#비동기식-호출과-Eventual-Consistency)
-    - [폴리글랏 퍼시스턴스](#폴리글랏-퍼시스턴스)
-    - [폴리글랏 프로그래밍](#폴리글랏-프로그래밍)
+    - [폴리글랏 퍼시스턴스/프로그래밍](#폴리글랏-퍼시스턴스/프로그래밍)
     - [API 게이트웨이](#API-게이트웨이)
   - [운영](#운영)
     - [CI/CD 설정](#cicd설정)
@@ -485,13 +484,11 @@ Hibernate:
 ![image](https://user-images.githubusercontent.com/78421066/125002840-ca5df600-e090-11eb-992c-ed72ee7cfca8.png)
 
 
-## 폴리글랏 퍼시스턴스
+## 폴리글랏 퍼시스턴스/프로그래밍
 - 각 마이크로 서비스들이 각자의 저장소 구조를 자율적으로 채택하고 각자의 저장소 유형 (RDB, NoSQL, File System 등)을 선택하여 구현하였는가?
 ```
 추가필요
 ```
-
-## 폴리글랏 프로그래밍
 
 - 각 마이크로 서비스들이 하나이상의 각자의 기술 Stack 으로 구성되었는가?
 ```
