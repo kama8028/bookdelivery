@@ -22,7 +22,7 @@ phases:
       - echo $AWS_DEFAULT_REGION
       - echo $CODEBUILD_RESOLVED_SOURCE_VERSION
       - echo start command
-      - $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
+      - aws ecr get-login-password --region ap-southeast-1 | docker login --username AWS --password-stdin 792923755188.dkr.ecr.ap-southeast-1.amazonaws.com
       - cd $_PROJECT_NAME
       - echo $PWD
   build:
