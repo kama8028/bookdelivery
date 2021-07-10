@@ -551,7 +551,7 @@ Gateway 포트인 8088을 통해서 주문을 생성시켜 8081 포트에서 서
 - 게이트웨이와 인증서버(OAuth), JWT 토큰 인증을 통하여 마이크로서비스들을 보호할 수 있는가?
 
 gateway(8088 포트)를 통한 orders, payments, ordermgmts, deliveries 경로 접근은 차단하도록 환경 설정을 하였다.
-pathMatchers("/oauth/'**'","/login/'**'").permitAll() : /oauth/'**', /login/'**' 경로만 게이트웨이에서 접근이 가능하도록 하였다.
+pathMatchers("/oauth/","/login/").permitAll() : /oauth/, /login/ 경로만 게이트웨이에서 접근이 가능하도록 하였다.
 oauth2ResourceServer() : 인증서버를 이용
 jwt() : jwt 방식 인증
 ```
