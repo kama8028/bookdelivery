@@ -22,7 +22,7 @@ phases:
       - echo $AWS_DEFAULT_REGION
       - echo $CODEBUILD_RESOLVED_SOURCE_VERSION
       - echo start command
-      - $(aws ecr get-login --regionus-east-2)
+      - $(aws ecr get-login --region us-east-2)
       - cd $_PROJECT_NAME
       - echo $PWD
   build:
