@@ -15,7 +15,7 @@ Lv.2 Intensive Coursework Group 3
     - [DDD 의 적용](#DDD-의-적용)
     - [동기식 호출과 Fallback 처리](#동기식-호출과-Fallback-처리)
     - [비동기식 호출과 Eventual Consistency](#비동기식-호출과-Eventual-Consistency)
-    - [폴리글랏 퍼시스턴스/프로그래밍](#폴리글랏-퍼시스턴스/프로그래밍)
+    - [폴리글랏 퍼시스턴스/프로그래밍](#폴리글랏-퍼시스턴스-프로그래밍)
     - [API 게이트웨이](#API-게이트웨이)
   - [운영](#운영)
     - [CI/CD 설정](#cicd설정)
@@ -627,5 +627,9 @@ http localhost:8088/ordermgmts "Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cC
 ```
 ![image](https://user-images.githubusercontent.com/78421066/125152033-30c44080-e185-11eb-902e-b9151c180b8c.png)
 
-
+# 운영
+## CI/CD 설정
+## 동기식 호출 / 서킷 브레이킹 / 장애격리
+## 오토스케일 아웃
+## 무정지 재배포
 
