@@ -551,9 +551,9 @@ Gateway 포트인 8088을 통해서 주문을 생성시켜 8081 포트에서 서
 - 게이트웨이와 인증서버(OAuth), JWT 토큰 인증을 통하여 마이크로서비스들을 보호할 수 있는가?
 
 gateway(8088 포트)를 통한 orders, payments, ordermgmts, deliveries 경로 접근은 차단하도록 환경 설정을 하였다.
-pathMatchers("/oauth/**","/login/**").permitAll() : /oauth/**, /login/** 경로만 게이트웨이에서 접근이 가능하도록 설정함
-.oauth2ResourceServer() : 인증서버를 이용
-.jwt() : jwt 방식 인증
+pathMatchers("/oauth/'**'","/login/'**'").permitAll() : /oauth/'**', /login/'**' 경로만 게이트웨이에서 접근이 가능하도록 하였다.
+oauth2ResourceServer() : 인증서버를 이용
+jwt() : jwt 방식 인증
 ```
    @Bean
     SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) throws Exception {
@@ -619,7 +619,7 @@ http --form POST localhost:8090/oauth/token "Authorization: Basic dWVuZ2luZS1jbG
 ```
 ![image](https://user-images.githubusercontent.com/78421066/125151912-8ba96800-e184-11eb-8523-c816453bcd27.png)
 
-해당 access_token의 값을 복사하여 다시 localhost:8088/ordermgmts에 접속됨을 확인 할 수 있다.
+해당 access_token 값을 가지고 다시 localhost:8088/ordermgmts에 접속하면 인증됨을 확인 할 수 있다.
 
 ```
 http localhost:8088/ordermgmts "Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZGRyZXNzIjoi7ISc7Jq47IucIiwidXNlcl9uYW1lIjoiMUB1ZW5naW5lLm9yZyIsInNjb3BlIjpbInJlYWQiLCJ3cml0ZSIsInRydXN0Il0sIm5pY2tuYW1lIjoi7Jyg7JeU7KeEIiwiY29tcGFueSI6IlVlbmdpbmUiLCJleHAiOjE2MjU5Nzg0NjQsImF1dGhvcml0aWVzIjpbIlVTRVJfQURNSU4iXSwianRpIjoiZ1l6cEltL29RYytucC9iYVZacGZYazNIU3k0PSIsImNsaWVudF9pZCI6InVlbmdpbmUtY2xpZW50In0.Ic56B-RPB4voEPSnQ_IecmSwbgqg2x7FojMFohKvHzMnKzA_6yb72vFs-ay3T7DSyplD22bdHvE1yEYV8oTzAv47srcjS4YLMnM9BDVLartkltfaj-DkXuiNRDbvesIKp4tTv3gFEQ16deocvY9W5Dv-Hkhqk_Hy4SlR2LKdKD2Q5yHDM4kqsNesjPFnRydJqHLgv0l9LIF76VJI5woMFJ8H6mRGE8DKJOvOF2DwItc8MzqgwILQV4WYzw8yRy_CZjR2hDG1wsqqhi1YlQWfgySRrFsaXAYv08h_rMPzudpncNOXM1i9SZlXcX0-BI03GCO6RmLMmo-NonTkSk5JTg"
