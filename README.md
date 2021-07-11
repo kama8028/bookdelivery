@@ -328,28 +328,8 @@ http PATCH localhost:8082/ordermgmts/1 orderStatus="cancel"
 
 - 마이크로 서비스간 Request-Response 호출에 있어 대상 서비스를 어떠한 방식으로 찾아서 호출 하였는가? (Service Discovery, REST, FeignClient)
 
-요구사항대로 주문이 들어와야지만 결제 서비스를 호출할 수 있도록 주문 시 결제 처리를 동기식으로 호출하도록 한다. 이는 FeignClient 를 이용하여 호출하도록 하였다.
+요구사항대로 주문이 들어와야지만 결제 서비스를 호출할 수 있도록 주문 시 결제 처리를 동기식으로 호출하도록 한다. 
 
-PaymentService.java
-
-```
-package bookdelivery.external;
-
-import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-
-import java.util.Date;
-
-@FeignClient(name="payment", url="http://localhost:8084", fallback = PaymentServiceFallback.class)
-public interface PaymentService {
-
-    @RequestMapping(method= RequestMethod.POST, path="/payments")
-    public void pay(@RequestBody Payment payment);
-
-}
-```
 Order.java Entity Class에 @PostPersist로 주문 생성 직후 결제를 호출하도록 처리하였다
 ```
 @PostPersist
@@ -375,6 +355,28 @@ Order.java Entity Class에 @PostPersist로 주문 생성 직후 결제를 호출
             .pay(payment);
     }
 ```
+동기식 호출은 PaymentService 클래스를 두어 FeignClient 를 이용하여 호출하도록 하였다.
+
+PaymentService.java
+
+```
+package bookdelivery.external;
+
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+
+import java.util.Date;
+
+@FeignClient(name="payment", url="http://localhost:8084", fallback = PaymentServiceFallback.class)
+public interface PaymentService {
+
+    @RequestMapping(method= RequestMethod.POST, path="/payments")
+    public void pay(@RequestBody Payment payment);
+
+}
+```
 동기식 호출로 인하여, 결제 서비스에 장애 발생 시(서비스 다운) 주문 서비스에도 장애가 전파된다는 것을 확인
 ```
 Order 서비스 구동 & Payment 서비스 다운 되어 있는 상태에서는 주문 생성 시 오류 발생
@@ -395,10 +397,9 @@ Transfer-Encoding: chunked
     "timestamp": "2021-07-11T14:44:14.537+0000"
 }
 
---> Payment 서비스 구동 
+--> Payment 서비스 구동하여 주문 재생성 시 정상적으로 생성됨
 C:\workspace\bookdelivery\payment>mvn spring-boot:run
 
---> 주문 재생성 시 정상적으로 생성됨
 C:\workspace\bookdelivery>http POST localhost:8088/orders customerId=9005 customerName="Cho" itemId=4340 itemName="ABC" qty=2 itemPrice=1000 deliveryAddress="GwaCheon" deliveryPhoneNumber="01011112222" orderStatus="orderPlaced"
 
 HTTP/1.1 201 Created
@@ -477,7 +478,9 @@ public class PaymentServiceFallback implements PaymentService{
 }
 
 ```
-payment 서비스를 중지하고 주문 생성 시에는 오류가 발생하나, 위와 같이 fallback 기능 활성화 후에는 payment서비스가 동작하지 않더라도 주문 생성 시에 오류가 발생하지 않는다
+fallback 기능 없이 payment 서비스를 중지하고 주문 생성 시에는 오류가 발생했으나, 
+
+위와 같이 fallback 기능 활성화 후에는 payment서비스가 동작하지 않더라도 주문 생성 시에 오류가 발생하지 않는다
 
 ```
 C:\workspace\bookdelivery> http POST localhost:8088/orders customerId=7777 customerName="HeidiCho" itemId=4340 itemName="ABC" qty=2 itemPrice=1000 deliveryAddress="GwaCheon" deliveryPhoneNumber="01011112222" orderStatus="orderPlaced"
