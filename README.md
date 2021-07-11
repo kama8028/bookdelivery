@@ -568,7 +568,7 @@ public class PolicyHandler{
         System.out.println("\n\n##### listener CancelOrder : " + orderCanceled.toJson() + "\n\n");
 
         // 주문 취소시 상태 UPDATE 필요, Correlation-key 연결
-        ordermgmtRepository.findById(orderCanceled.getOrderId()).ifPresent(ordermgmt->{
+        ordermgmtRepository.findByOrderId(orderCanceled.getOrderId()).ifPresent(ordermgmt->{
             ordermgmtRepository.save(ordermgmt);
         });
     }
