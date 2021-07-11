@@ -43,21 +43,6 @@ phases:
       - kubectl config set-context default --cluster=k8s --user=admin
       - kubectl config use-context default
       - |
-          cat <<EOF | kubectl apply -f -
-          apiVersion: v1
-          kind: Service
-          metadata:
-            name: $_PROJECT_NAME
-            labels:
-              app: $_PROJECT_NAME
-          spec:
-            ports:
-              - port: 8080
-                targetPort: 8080
-            selector:
-              app: $_PROJECT_NAME
-          EOF
-      - |
           cat  <<EOF | kubectl apply -f -
           apiVersion: apps/v1
           kind: Deployment
@@ -97,6 +82,21 @@ phases:
                       periodSeconds: 5
                       failureThreshold: 5
           EOF
+      - |
+          cat <<EOF | kubectl apply -f -
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: $_PROJECT_NAME
+            labels:
+              app: $_PROJECT_NAME
+          spec:
+            ports:
+              - port: 8080
+                targetPort: 8080
+            selector:
+              app: $_PROJECT_NAME
+          EOF      
 cache:
   paths:
     - '/root/.m2/**/*'
