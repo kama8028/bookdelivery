@@ -328,19 +328,208 @@ http PATCH localhost:8082/ordermgmts/1 orderStatus="cancel"
 
 - 마이크로 서비스간 Request-Response 호출에 있어 대상 서비스를 어떠한 방식으로 찾아서 호출 하였는가? (Service Discovery, REST, FeignClient)
 
-요구사항대로 주문이 되어야지만 결제 서비스를 호출할 수 있도록 주문 시 결제 처리를 동기식으로 호출하도록 한다. 이는 FeignClient 를 이용하여 호출하도록 하였다.
+요구사항대로 주문이 들어와야지만 결제 서비스를 호출할 수 있도록 주문 시 결제 처리를 동기식으로 호출하도록 한다. 이는 FeignClient 를 이용하여 호출하도록 하였다.
 
 PaymentService.java
 
 ```
-추가필요
+package bookdelivery.external;
+
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+
+import java.util.Date;
+
+@FeignClient(name="payment", url="http://localhost:8084", fallback = PaymentServiceFallback.class)
+public interface PaymentService {
+
+    @RequestMapping(method= RequestMethod.POST, path="/payments")
+    public void pay(@RequestBody Payment payment);
+
+}
+```
+Order.java Entity Class에 @PostPersist로 주문 생성 직후 결제를 호출하도록 처리하였다
+```
+@PostPersist
+    public void onPostPersist(){
+        OrderPlaced orderPlaced = new OrderPlaced();
+        BeanUtils.copyProperties(this, orderPlaced);
+        orderPlaced.publishAfterCommit();
+
+        //Following code causes dependency to external APIs
+        // it is NOT A GOOD PRACTICE. instead, Event-Policy mapping is recommended.
+
+        bookdelivery.external.Payment payment = new bookdelivery.external.Payment();
+        //mappings goes here
+        //add
+        payment.setOrderId(this.getOrderId());
+        payment.setItemPrice(this.getItemPrice());
+        payment.setItemName(this.getItemName());
+        payment.setQty(this.getQty());
+        payment.setCustomerName(this.getCustomerName());
+        payment.setDeliveryAddress(this.getDeliveryAddress());
+        payment.setDeliveryPhoneNumber(this.getDeliveryPhoneNumber());
+        OrderApplication.applicationContext.getBean(bookdelivery.external.PaymentService.class)
+            .pay(payment);
+    }
+```
+동기식 호출로 인하여, 결제 서비스에 장애 발생 시(서비스 다운) 주문 서비스에도 장애가 전파된다는 것을 확인
+```
+Order 서비스 구동 & Payment 서비스 다운 되어 있는 상태에서는 주문 생성 시 오류 발생
+
+C:\workspace\bookdelivery>http POST localhost:8088/orders customerId=9005 customerName="Cho" itemId=4340 itemName="ABC" qty=2 itemPrice=1000 deliveryAddress="GwaCheon" deliveryPhoneNumber="01011112222" orderStatus="orderPlaced"
+
+HTTP/1.1 500
+Connection: close
+Content-Type: application/json;charset=UTF-8
+Date: Sun, 11 Jul 2021 14:44:14 GMT
+Transfer-Encoding: chunked
+
+{
+    "error": "Internal Server Error",
+    "message": "Could not commit JPA transaction; nested exception is javax.persistence.RollbackException: Error while committing the transaction",
+    "path": "/orders",
+    "status": 500,
+    "timestamp": "2021-07-11T14:44:14.537+0000"
+}
+
+--> Payment 서비스 구동 
+C:\workspace\bookdelivery\payment>mvn spring-boot:run
+
+--> 주문 재생성 시 정상적으로 생성됨
+C:\workspace\bookdelivery>http POST localhost:8088/orders customerId=9005 customerName="Cho" itemId=4340 itemName="ABC" qty=2 itemPrice=1000 deliveryAddress="GwaCheon" deliveryPhoneNumber="01011112222" orderStatus="orderPlaced"
+
+HTTP/1.1 201 Created
+Content-Type: application/json;charset=UTF-8
+Date: Sun, 11 Jul 2021 14:50:14 GMT
+Location: http://localhost:8081/orders/1
+transfer-encoding: chunked
+
+{
+    "_links": {
+        "order": {
+            "href": "http://localhost:8081/orders/1"
+        },
+        "self": {
+            "href": "http://localhost:8081/orders/1"
+        }
+    },
+    "customerId": 9005,
+    "customerName": "Cho",
+    "deliveryAddress": "GwaCheon",
+    "deliveryPhoneNumber": "01011112222",
+    "itemId": 4340,
+    "itemName": "ABC",
+    "itemPrice": 1000,
+    "orderStatus": "orderPlaced",
+    "qty": 2
+}
 ```
 
-- 서킷브레이커를 통하여  장애를 격리시킬 수 있는가?
+- 서킷브레이커를 통하여 장애를 격리시킬 수 있는가?
+
+주문-결제 Req-Res구조에서 FeignClient 및 Spring Hystrix 를 사용하여 Fallback 기능을 구현하였다
+
+Order 서비스의 application.yml 파일에 feign.hystrix.enabled: true 로 활성화시킨다
 
 ```
-추가필요
+feign:
+  hystrix:
+    enabled: true
 ```
+PaymentService 에 feignClient fallback 옵션을 추가하였고 이를 위해 PaymentServiceFallback 클래스를 추가하였다
+
+PaymentService.java
+```
+package bookdelivery.external;
+
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+
+import java.util.Date;
+
+@FeignClient(name="payment", url="http://localhost:8084", fallback = PaymentServiceFallback.class)
+public interface PaymentService {
+
+    @RequestMapping(method= RequestMethod.POST, path="/payments")
+    public void pay(@RequestBody Payment payment);
+
+}
+```
+PaymentServiceFallback.java
+```
+package bookdelivery.external;
+
+import org.springframework.stereotype.Component;
+
+@Component
+public class PaymentServiceFallback implements PaymentService{
+
+  @Override
+  public void pay(Payment payment) {
+    System.out.println("Circuit breaker has been opened. Fallback returned instead.");
+  }
+
+}
+
+```
+payment 서비스를 중지하고 주문 생성 시에는 오류가 발생하나, 위와 같이 fallback 기능 활성화 후에는 payment서비스가 동작하지 않더라도 주문 생성 시에 오류가 발생하지 않는다
+
+```
+C:\workspace\bookdelivery> http POST localhost:8088/orders customerId=7777 customerName="HeidiCho" itemId=4340 itemName="ABC" qty=2 itemPrice=1000 deliveryAddress="GwaCheon" deliveryPhoneNumber="01011112222" orderStatus="orderPlaced"
+HTTP/1.1 201 Created
+Content-Type: application/json;charset=UTF-8
+Date: Sun, 11 Jul 2021 15:54:23 GMT
+Location: http://localhost:8081/orders/3
+transfer-encoding: chunked
+
+{
+    "_links": {
+        "order": {
+            "href": "http://localhost:8081/orders/3"
+        },
+        "self": {
+            "href": "http://localhost:8081/orders/3"
+        }
+    },
+    "customerId": 7777,
+    "customerName": "HeidiCho",
+    "deliveryAddress": "GwaCheon",
+    "deliveryPhoneNumber": "01011112222",
+    "itemId": 4340,
+    "itemName": "ABC",
+    "itemPrice": 1000,
+    "orderStatus": "orderPlaced",
+    "qty": 2
+}
+```
+```
+Hibernate:
+    insert
+    into
+        order_table
+        (customer_id, customer_name, delivery_address, delivery_phone_number, item_id, item_name, item_price, order_status, qty, order_id)
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+2021-07-12 00:54:23.262 TRACE 12760 --- [nio-8081-exec-4] o.h.type.descriptor.sql.BasicBinder      : binding parameter [1] as [BIGINT] - [7777]
+2021-07-12 00:54:23.262 TRACE 12760 --- [nio-8081-exec-4] o.h.type.descriptor.sql.BasicBinder      : binding parameter [2] as [VARCHAR] - [HeidiCho]
+2021-07-12 00:54:23.263 TRACE 12760 --- [nio-8081-exec-4] o.h.type.descriptor.sql.BasicBinder      : binding parameter [3] as [VARCHAR] - [GwaCheon]
+2021-07-12 00:54:23.263 TRACE 12760 --- [nio-8081-exec-4] o.h.type.descriptor.sql.BasicBinder      : binding parameter [4] as [VARCHAR] - [01011112222]
+2021-07-12 00:54:23.263 TRACE 12760 --- [nio-8081-exec-4] o.h.type.descriptor.sql.BasicBinder      : binding parameter [5] as [BIGINT] - [4340]
+2021-07-12 00:54:23.264 TRACE 12760 --- [nio-8081-exec-4] o.h.type.descriptor.sql.BasicBinder      : binding parameter [6] as [VARCHAR] - [ABC]
+2021-07-12 00:54:23.264 TRACE 12760 --- [nio-8081-exec-4] o.h.type.descriptor.sql.BasicBinder      : binding parameter [7] as [INTEGER] - [1000]
+2021-07-12 00:54:23.265 TRACE 12760 --- [nio-8081-exec-4] o.h.type.descriptor.sql.BasicBinder      : binding parameter [8] as [VARCHAR] - [orderPlaced]
+2021-07-12 00:54:23.265 TRACE 12760 --- [nio-8081-exec-4] o.h.type.descriptor.sql.BasicBinder      : binding parameter [9] as [INTEGER] - [2]
+2021-07-12 00:54:23.265 TRACE 12760 --- [nio-8081-exec-4] o.h.type.descriptor.sql.BasicBinder      : binding parameter [10] as [BIGINT] - [3]
+2021-07-12 00:54:23.268 DEBUG 12760 --- [strix-payment-2] o.s.c.openfeign.support.SpringEncoder    : Writing [bookdelivery.external.Payment@2d962b78] using [org.springframework.http.converter.json.MappingJackson2HttpMessageConverter@2e4166b7]
+Circuit breaker has been opened. Fallback returned instead.
+```
+위와 같이 fallack 옵션이 동작하여 "Circuit breaker has been opened. Fallback returned instead." 로그가 보여진다
+
 
 ## 비동기식 호출과 Eventual Consistency 
 (이벤트 드리븐 아키텍처)
