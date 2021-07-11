@@ -30,18 +30,18 @@ public class DeliveryStarted extends AbstractEvent {
     public void setCustomerName(String customerName) {
         this.customerName = customerName;
     }
-    public String get배달주소() {
+    public String getDeliveryAddress() {
         return deliveryAddress;
     }
 
-    public void set배달주소(String deliveryAddress) {
+    public void setDeliveryAddress(String deliveryAddress) {
         this.deliveryAddress = deliveryAddress;
     }
-    public String get배달연락처() {
+    public String getDeliveryPhoneNumber() {
         return deliveryPhoneNumber;
     }
 
-    public void set배달연락처(String deliveryPhoneNumber) {
+    public void setDeliveryPhoneNumber(String deliveryPhoneNumber) {
         this.deliveryPhoneNumber = deliveryPhoneNumber;
     }
     public String getOrderStatus() {

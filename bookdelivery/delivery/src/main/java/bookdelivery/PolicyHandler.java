@@ -21,21 +21,14 @@ public class PolicyHandler{
 
         // Sample Logic //
         Delivery delivery = new Delivery();
+        delivery.setOrderId(orderTaken.getOrderId());
+        delivery.setCustomerName(orderTaken.getCustomerName());
+        delivery.setDeliveryAddress(orderTaken.getDeliveryAddress());
+        delivery.setDeliveryPhoneNumber(orderTaken.getDeliveryPhoneNumber());
+        delivery.setOrderStatus(orderTaken.getOrderStatus());
         deliveryRepository.save(delivery);
-            
     }
-    @StreamListener(KafkaProcessor.INPUT)
-    public void wheneverOrderTaken_StartDelivery(@Payload OrderTaken orderTaken){
-
-        if(!orderTaken.validate()) return;
-
-        System.out.println("\n\n##### listener StartDelivery : " + orderTaken.toJson() + "\n\n");
-
-        // Sample Logic //
-        Delivery delivery = new Delivery();
-        deliveryRepository.save(delivery);
-            
-    }
+    
     @StreamListener(KafkaProcessor.INPUT)
     public void wheneverCancelOrderTaken_CancelDelivery(@Payload CancelOrderTaken cancelOrderTaken){
 
@@ -43,10 +36,12 @@ public class PolicyHandler{
 
         System.out.println("\n\n##### listener CancelDelivery : " + cancelOrderTaken.toJson() + "\n\n");
 
-        // Sample Logic //
-        Delivery delivery = new Delivery();
-        deliveryRepository.save(delivery);
-            
+        // 결제 취소시 배송도 취소(상태 UPDATE)
+        deliveryRepository.findById(cancelOrderTaken.getOrderId()).ifPresent(delivery->{
+            delivery.setOrderStatus(cancelOrderTaken.getOrderStatus());
+            deliveryRepository.save(delivery);
+        });
+
     }
 
 
