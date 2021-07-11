@@ -620,9 +620,11 @@ CQRS 테스트
 
 ![5_점주가주문접수하여ordermgmt생성](https://user-images.githubusercontent.com/85722733/125193070-9ef02c80-e285-11eb-9629-06928f76cf17.png)
 
+![6_주문접수및배달시작이벤트발생](https://user-images.githubusercontent.com/85722733/125193423-52a5ec00-e287-11eb-8c2e-c388a747d017.png)
+
 ![7_배달시작시mypage상태업데이트](https://user-images.githubusercontent.com/85722733/125193080-a6afd100-e285-11eb-9116-15670b9a842c.png)
 
-주문접수취소에 따른 결제취소완료 시 주문취소에 대해 주문상태가 'OrderFinallyCanceled'로 변경되며 MyPage에 해당 주문 건에 대한 주문상태가 'orderFinallyCanceled'로 동일하게 조회된다
+주문접수취소에 따른 결제취소완료 시 최종주문취소로 간주하여 주문상태가 'OrderFinallyCanceled'로 변경되며 MyPage에 해당 주문 건에 대한 주문상태가 'orderFinallyCanceled'로 동일하게 조회된다
 
 ![8_주문접수취소](https://user-images.githubusercontent.com/85722733/125193096-b29b9300-e285-11eb-9578-0adb198bc557.png)
 
