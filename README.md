@@ -424,12 +424,19 @@ Hibernate:
 
 주문/배송상태가 바뀔 때마다 고객이 마이페이지에서 상태를 확인할 수 있어야 한다는 요구사항에 따라 주문 서비스 내에 MyPage View를 모델링하였다
 
-주문이 생성될때 orderId를 키값으로 MyPage 데이터도 생성되며 "결제완료(주문완료), 주문접수, 배송시작, 결제취소(주문취소)"의 이벤트에 따라 주문상태가 업데이트되도록 모델링하였다
+![mypage](https://user-images.githubusercontent.com/85722733/125193030-68b2ad00-e285-11eb-9261-4b2dbf5cfb91.png)
+
+주문에 대한 결제완료(PayApproved) 시 orderId를 키값으로 MyPage 데이터도 생성되며 (요구사항으로 결제가 완료된 건에 대해서만 주문으로 인정하므로)
+
+"결제완료(주문완료), 주문접수, 배송시작, 결제취소(주문취소)"의 이벤트에 따라 주문상태가 업데이트되도록 모델링하였다
 
 MyPage View 의 속성값
 
+![속성값](https://user-images.githubusercontent.com/85722733/125192987-4f116580-e285-11eb-985b-9355ab17385a.png)
 
-MSAEz 모델링 도구 내 View CQRS 설정 
+MSAEz 모델링 도구 내 View CQRS 설정 샘플
+
+![CQRS설정](https://user-images.githubusercontent.com/85722733/125193008-5afd2780-e285-11eb-8b54-67078edbffaf.png)
 
 자동생성된 소스는 아래와 같다
 
@@ -514,7 +521,7 @@ public interface MyPageRepository extends CrudRepository<MyPage, Long> {
 
 }
 ```
-MyPageViewHandler.java : 아래와 같이 결제완료를 통한 주문 생성 및 주문상태 변경에 대한 이벤트 수신 처리부가 있다
+MyPageViewHandler.java : 아래와 같이 결제완료를 통한 MyPage 주문 데이터 생성 및 주문상태 변경에 대한 이벤트 수신 처리부가 있다
 
 주문에 대한 결제완료 시 이벤트
 ```
@@ -603,13 +610,25 @@ CQRS 테스트
 
 주문에 대한 결제완료 시 주문 정상 등록됨을 확인
 
+![1_payment발생](https://user-images.githubusercontent.com/85722733/125193044-7b2ce680-e285-11eb-9756-36c608bf30ab.png)
+
 아래와 같이 MyPage에도 주문상태가 'payApproved:orderFinallyPlaced'로 정상 등록되어 조회됨을 확인
+
+![4_결제완료시주문완료로mypage상태업데이트](https://user-images.githubusercontent.com/85722733/125193056-8bdd5c80-e285-11eb-8457-a9771b96aded.png)
 
 점주가 주문 접수건 발생 시에는 배송시작 이벤트가 발행되어 MyPage에 해당 주문 건에 대한 주문상태가 'deliveryStarted' 상태로 변경되어 조회됨을 확인
 
-결제취소완료 시 주문취소에 대해 주문상태가 'OrderFinallyCanceled'로 변경되며 MyPage에 해당 주문 건에 대한 주문상태가 'orderFinallyCanceled'로 동일하게 조회된다
+![5_점주가주문접수하여ordermgmt생성](https://user-images.githubusercontent.com/85722733/125193070-9ef02c80-e285-11eb-9629-06928f76cf17.png)
 
+![7_배달시작시mypage상태업데이트](https://user-images.githubusercontent.com/85722733/125193080-a6afd100-e285-11eb-9116-15670b9a842c.png)
 
+주문접수취소에 따른 결제취소완료 시 주문취소에 대해 주문상태가 'OrderFinallyCanceled'로 변경되며 MyPage에 해당 주문 건에 대한 주문상태가 'orderFinallyCanceled'로 동일하게 조회된다
+
+![8_주문접수취소](https://user-images.githubusercontent.com/85722733/125193096-b29b9300-e285-11eb-9578-0adb198bc557.png)
+
+![11_주문접수취소및결제취소및배달취소이벤트발생](https://user-images.githubusercontent.com/85722733/125193261-7fa5cf00-e286-11eb-8e69-69b00f2b5ec3.png)
+
+![10_결제취소시mypage상태업데이트](https://user-images.githubusercontent.com/85722733/125193121-d52dac00-e285-11eb-9eea-e508c98b23bc.png)
 
 - Message Consumer 마이크로서비스가 장애상황에서 수신받지 못했던 기존 이벤트들을 다시 수신받아 처리하는가?
 
