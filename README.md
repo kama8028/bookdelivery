@@ -605,13 +605,72 @@ Hibernate:
 변동사항 없음
 ```
 
-8083 포트를 중지 시키면 8093포트의 delivery 서비스에서 partition을 할당 받는다
+8083 포트를 중지 시키면 8093포트의 delivery 서비스에서 partition을 할당받는다
 ![image](https://user-images.githubusercontent.com/78421066/125026249-1fb0fc00-e0bf-11eb-9af2-d9888005c67a.png)
 
+### SAGA 패턴
 - 취소에 따른 보상 트랜잭션을 설계하였는가(Saga Pattern)
-```
-추가필요
-```
+
+SAGA 패턴은 각 서비스의 트랜잭션 완료 후에 다음 서비스가 트리거 되어 트랜잭션을 실행하는 방법으로
+
+현재 BookDelivery 시스템도 SAGA 패턴으로 설계되어 있다.
+
+#### SAGA 패턴에 맞춘 트랜잭션 실행
+
+![사가1](https://user-images.githubusercontent.com/85722733/125202925-f0fa7780-e2b0-11eb-9ab9-370213664955.png)
+
+order 서비스의 주문 생성이 완료되면 payment 서비스를 트리거하게 되고 결제를 발생시킨다
+
+실행한 결과는 아래와 같다
+
+![1_order생성](https://user-images.githubusercontent.com/85722733/125205577-e2ff2380-e2bd-11eb-821f-a80e801d3352.jpg)
+
+![2_payment생성되어있음](https://user-images.githubusercontent.com/85722733/125205593-fca06b00-e2bd-11eb-821f-be4f864ab807.jpg)
+
+주문 생성 시 결국 결제가 발생하여 결제 승인이 나게 되며, 
+
+![2_카프카orderplaced](https://user-images.githubusercontent.com/85722733/125205607-0c1fb400-e2be-11eb-831c-5d833a2be269.jpg)
+
+이를 ordermanagement 서비스에서 연계받아 주문내역을 수신받게 된다
+
+![5_주문내역전달](https://user-images.githubusercontent.com/85722733/125205624-20fc4780-e2be-11eb-81dd-5d7dd97f7be8.jpg)
+
+점주가 주문을 접수하여 주문접수 건이 생성되면 
+
+![6_주문접수생성](https://user-images.githubusercontent.com/85722733/125205658-49844180-e2be-11eb-953b-4732d80bcea4.jpg)
+
+delivery 서비스에서 배송시작 이벤트가 트리거 된다
+
+![6_5_startdelivery](https://user-images.githubusercontent.com/85722733/125205664-52751300-e2be-11eb-9c72-3680aee4a68a.jpg)
+
+![7_카프카주문접수배달시작](https://user-images.githubusercontent.com/85722733/125205667-59038a80-e2be-11eb-9d30-a1d453635722.jpg)
+
+
+#### SAGA 패턴에 맞춘 Roll-Back 
+![사가2](https://user-images.githubusercontent.com/85722733/125203148-45eabd80-e2b2-11eb-9568-950a569ac1cc.png)
+
+ordermanagement 서비스에서 주문접수취소가 발생하면 발행된 이벤트가 payment 서비스 및 delivery 서비스로 트리거되어 해당 주문에 대해 결제취소 및 배송취소가 되도록 보상 트랜잭션을 발생시킨다
+
+실행한 결과는 아래와 같다
+
+고객의 주문취소로 인하여 주문 상태를 주문취소로 업데이트 시 
+
+![8_주문취소](https://user-images.githubusercontent.com/85722733/125205690-7cc6d080-e2be-11eb-972f-3877814c55e6.jpg)
+
+OrderCanceled 이벤트로 인하여 orderManagement 서비스에서 주문상태가 주문접수취소로 업데이트되어 이벤트가 발생되고
+
+![8_5_주문접수취소호출](https://user-images.githubusercontent.com/85722733/125205700-8f410a00-e2be-11eb-8e9e-65560408ad0f.jpg)
+
+이로 인해 트리거되어 payment 및 delivery 서비스에서도 취소 이벤트가 발생하게 된다
+
+![8_5_결제취소호출](https://user-images.githubusercontent.com/85722733/125205708-9b2ccc00-e2be-11eb-9f26-788b5e07a017.jpg)
+
+![8_5_배송취소호출](https://user-images.githubusercontent.com/85722733/125205702-95cf8180-e2be-11eb-95ba-50910f689f65.jpg)
+
+![9_카프카취소이벤트](https://user-images.githubusercontent.com/85722733/125205715-a1bb4380-e2be-11eb-840a-f6680d818979.jpg)
+
+
+### CQRS
 - CQRS: Materialized View 를 구현하여, 타 마이크로서비스의 데이터 원본에 접근없이(Composite 서비스나 조인SQL 등 없이) 도 내 서비스의 화면 구성과 잦은 조회가 가능한가?
 
 주문/배송상태가 바뀔 때마다 고객이 마이페이지에서 상태를 확인할 수 있어야 한다는 요구사항에 따라 주문 서비스 내에 MyPage View를 모델링하였다
