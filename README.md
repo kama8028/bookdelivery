@@ -421,9 +421,194 @@ Hibernate:
 추가필요
 ```
 - CQRS: Materialized View 를 구현하여, 타 마이크로서비스의 데이터 원본에 접근없이(Composite 서비스나 조인SQL 등 없이) 도 내 서비스의 화면 구성과 잦은 조회가 가능한가?
+
+주문/배송상태가 바뀔 때마다 고객이 마이페이지에서 상태를 확인할 수 있어야 한다는 요구사항에 따라 주문 서비스 내에 MyPage View를 모델링하였다
+
+주문이 생성될때 orderId를 키값으로 MyPage 데이터도 생성되며 "결제완료(주문완료), 주문접수, 배송시작, 결제취소(주문취소)"의 이벤트에 따라 주문상태가 업데이트되도록 모델링하였다
+
+MyPage View 의 속성값
+
+
+MSAEz 모델링 도구 내 View CQRS 설정 
+
+자동생성된 소스는 아래와 같다
+
+MyPage CQRS처리를 위해 주문, 결제, 주문관리, 배송 서비스와 별개로 조회를 위한 MyPage_table 테이블이 생성된다
+
+MyPage.java : 엔티티 클래스
 ```
-추가필요
+package bookdelivery;
+
+import javax.persistence.*;
+import java.util.List;
+
+@Entity
+@Table(name="MyPage_table")
+public class MyPage {
+
+        @Id
+        @GeneratedValue(strategy=GenerationType.AUTO)
+        private Long orderId;
+        private String customerName;
+        private String itemName;
+        private Integer qty;
+        private Integer itemPrice;
+        private String orderStatus;
+
+
+        public Long getOrderId() {
+            return orderId;
+        }
+
+        public void setOrderId(Long orderId) {
+            this.orderId = orderId;
+        }
+        public String getCustomerName() {
+            return customerName;
+        }
+
+        public void setCustomerName(String customerName) {
+            this.customerName = customerName;
+        }
+        public String getItemName() {
+            return itemName;
+        }
+
+        public void setItemName(String itemName) {
+            this.itemName = itemName;
+        }
+        public Integer getQty() {
+            return qty;
+        }
+
+        public void setQty(Integer qty) {
+            this.qty = qty;
+        }
+        public Integer getItemPrice() {
+            return itemPrice;
+        }
+
+        public void setItemPrice(Integer itemPrice) {
+            this.itemPrice = itemPrice;
+        }
+        public String getOrderStatus() {
+            return orderStatus;
+        }
+
+        public void setOrderStatus(String orderStatus) {
+            this.orderStatus = orderStatus;
+        }
+
+}
 ```
+MyPageRepository.java : 퍼시스턴스
+```
+package bookdelivery;
+
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
+
+import java.util.List;
+
+public interface MyPageRepository extends CrudRepository<MyPage, Long> {
+
+}
+```
+MyPageViewHandler.java : 아래와 같이 결제완료를 통한 주문 생성 및 주문상태 변경에 대한 이벤트 수신 처리부가 있다
+
+주문에 대한 결제완료 시 이벤트
+```
+@StreamListener(KafkaProcessor.INPUT)
+    public void whenPayApproved_then_CREATE_1 (@Payload PayApproved payApproved) {
+        try {
+
+            if (!payApproved.validate()) return;
+
+            // view 객체 생성
+            MyPage myPage = new MyPage();
+            // view 객체에 이벤트의 Value 를 set 함
+            myPage.setOrderId(payApproved.getOrderId());
+            myPage.setCustomerName(payApproved.getCustomerName());
+            myPage.setItemName(payApproved.getItemName());
+            myPage.setQty(payApproved.getQty());
+            myPage.setItemPrice(payApproved.getItemPrice());
+            myPage.setOrderStatus(payApproved.getOrderStatus());
+            // view 레파지 토리에 save
+            myPageRepository.save(myPage);
+        
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+```
+주문상태 업데이트 이벤트
+```
+@StreamListener(KafkaProcessor.INPUT)
+    public void whenOrderTaken_then_UPDATE_1(@Payload OrderTaken orderTaken) {
+        try {
+            if (!orderTaken.validate()) return;
+                // view 객체 조회
+            Optional<MyPage> myPageOptional = myPageRepository.findById(orderTaken.getOrderId());
+            if( myPageOptional.isPresent()) {
+                MyPage myPage = myPageOptional.get();
+                // view 객체에 이벤트의 eventDirectValue 를 set 함
+                    myPage.setOrderStatus(orderTaken.getOrderStatus());
+                // view 레파지 토리에 save
+                myPageRepository.save(myPage);
+            }
+            
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+    @StreamListener(KafkaProcessor.INPUT)
+    public void whenDeliveryStarted_then_UPDATE_2(@Payload DeliveryStarted deliveryStarted) {
+        try {
+            if (!deliveryStarted.validate()) return;
+                // view 객체 조회
+            Optional<MyPage> myPageOptional = myPageRepository.findById(deliveryStarted.getOrderId());
+            if( myPageOptional.isPresent()) {
+                MyPage myPage = myPageOptional.get();
+                // view 객체에 이벤트의 eventDirectValue 를 set 함
+                    myPage.setOrderStatus(deliveryStarted.getOrderStatus());
+                // view 레파지 토리에 save
+                myPageRepository.save(myPage);
+            }
+            
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+    @StreamListener(KafkaProcessor.INPUT)
+    public void whenPayCanceled_then_UPDATE_3(@Payload PayCanceled payCanceled) {
+        try {
+            if (!payCanceled.validate()) return;
+                // view 객체 조회
+            Optional<MyPage> myPageOptional = myPageRepository.findById(payCanceled.getOrderId());
+            if( myPageOptional.isPresent()) {
+                MyPage myPage = myPageOptional.get();
+                // view 객체에 이벤트의 eventDirectValue 를 set 함
+                    myPage.setOrderStatus(payCanceled.getOrderStatus());
+                // view 레파지 토리에 save
+                myPageRepository.save(myPage);
+            }
+            
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+```
+
+CQRS 테스트
+
+주문에 대한 결제완료 시 주문 정상 등록됨을 확인
+
+아래와 같이 MyPage에도 주문상태가 'payApproved:orderFinallyPlaced'로 정상 등록되어 조회됨을 확인
+
+점주가 주문 접수건 발생 시에는 배송시작 이벤트가 발행되어 MyPage에 해당 주문 건에 대한 주문상태가 'deliveryStarted' 상태로 변경되어 조회됨을 확인
+
+결제취소완료 시 주문취소에 대해 주문상태가 'OrderFinallyCanceled'로 변경되며 MyPage에 해당 주문 건에 대한 주문상태가 'orderFinallyCanceled'로 동일하게 조회된다
+
 
 
 - Message Consumer 마이크로서비스가 장애상황에서 수신받지 못했던 기존 이벤트들을 다시 수신받아 처리하는가?
