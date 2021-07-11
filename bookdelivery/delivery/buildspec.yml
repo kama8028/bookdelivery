@@ -47,8 +47,8 @@ phases:
           apiVersion: apps/v1
           kind: Deployment
           metadata:
-            name: $_PROJECT_NAME
-          #  name: mydeploy
+          #  name: $_PROJECT_NAME
+            name: mydeploy
             labels:
           #    app: $_PROJECT_NAME
               app: mydeploy
