@@ -27,7 +27,7 @@ phases:
       - echo $PWD
       - cd $REPOSITORY
       - echo $PWD    
-      - docker build -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/user03-final:$CODEBUILD_RESOLVED_SOURCE_VERSION  .
+      #- docker build -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/user03-final:$CODEBUILD_RESOLVED_SOURCE_VERSION  .
   build:
     commands:
       - echo Build started on `date`
