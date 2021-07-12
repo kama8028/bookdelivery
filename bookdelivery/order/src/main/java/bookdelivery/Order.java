@@ -5,6 +5,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.PostUpdate;
+import javax.persistence.PrePersist;
 import javax.persistence.PostPersist;
 import javax.persistence.Table;
 
@@ -27,6 +28,15 @@ public class Order {
     private String deliveryPhoneNumber;
     private String orderStatus;
 
+    @PrePersist
+    public void onPrePersist(){
+        try {
+            Thread.currentThread().sleep((long) (400 + Math.random() * 220));
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+    
     @PostPersist
     public void onPostPersist(){
         OrderPlaced orderPlaced = new OrderPlaced();
