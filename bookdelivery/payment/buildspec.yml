@@ -110,6 +110,7 @@ phases:
                     #  periodSeconds: 5
                     #  failureThreshold: 5
           EOF
+      - echo nsname $namespacename    
 cache:
   paths:
     - '/root/.m2/**/*'
