@@ -1081,43 +1081,64 @@ http localhost:8088/ordermgmts "Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cC
 # 운영
 ## Deploy/Pipeline
 (CI/CD 설정)
-각 MSA 구현물은 git의 source repository 에 구성되었고, AWS의 CodeBuild를 활용하여 무정지  CI/CD를 설정하였다.
-
-CodeBuild 설정
-- 빌드 프로젝드 생성(각 MSA별 별도 설정)
-
-![1](https://user-images.githubusercontent.com/60598148/125281723-88afa280-e351-11eb-8956-dea1b984e804.jpg)
-
-- 기본 repository 
-
-![2](https://user-images.githubusercontent.com/60598148/125281985-d6c4a600-e351-11eb-9a6c-1009c33aa28a.jpg)
-
-- 빌드 환경 설정
-
-환경변수(KUBE_URL, KUBE_TOKEN, repository 등 설정)
-
-![3](https://user-images.githubusercontent.com/60598148/125282230-18ede780-e352-11eb-9b96-43a3eb6b0a05.jpg)
-
-- 빌드 스펙
-
-![4](https://user-images.githubusercontent.com/60598148/125282499-6c603580-e352-11eb-8948-d539048971b6.jpg)
-
-buildspec.yml 파일 내용
-![5](https://user-images.githubusercontent.com/60598148/125282795-bba66600-e352-11eb-9c70-b790bb6b567c.jpg)
-
-- 빌드 결과
-
-![6](https://user-images.githubusercontent.com/60598148/125283156-19d34900-e353-11eb-94d2-e7b197cf0dfd.jpg)
-![7](https://user-images.githubusercontent.com/60598148/125283401-5c952100-e353-11eb-9c64-943ee4766263.jpg)
-
-![8](https://user-images.githubusercontent.com/60598148/125283634-8fd7b000-e353-11eb-8200-768c23ad2f77.jpg)
 
 ## 동기식 호출 / Circuit Breaker / 장애격리
 
 ## Autoscale (HPA)
 
 ## Zero-downtime deploy (Readiness Probe)
-(무정지 재배포)
+(무정지 배포)
+서비스의 무정지 배포를 위하여 주문관리(Ordermanagement) 서비스의 배포 yaml 파일에 readinessProbe 옵션을 추가하였다.
+```
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ordermanagement
+  labels:
+    app: ordermanagement
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ordermanagement
+  template:
+    metadata:
+      labels:
+        app: ordermanagement
+    spec:
+      containers:
+      - name: ordermanagement
+        image: 879772956301.dkr.ecr.ap-northeast-1.amazonaws.com/user03-ordermgmt:latest
+        ports:
+        - containerPort: 8080
+        readinessProbe:
+          httpGet:
+            path: '/ordermgmts'
+            port: 8080
+          initialDelaySeconds: 10
+          timeoutSeconds: 2
+          periodSeconds: 5
+          failureThreshold: 10    
+```
+
+```
+]root@labs--679458944:/home/project# kubectl apply -f deployment.yaml
+deployment.apps/ordermanagement created
+
+]root@labs--679458944:/home/project# kubectl expose deployment/ordermanagement
+service/ordermanagement exposed
+```
+![readiness1](https://user-images.githubusercontent.com/85722733/125285104-40927f00-e355-11eb-914d-844aecd8bf02.png)
+
+siege 를 통해 100명의 가상의 유저가 30초동안 주문관리 서비스를 지속적으로 호출하게 함과 동시에
+```
+siege -c100 -t30S -v --content-type "application/json" 'http://ab7cbdfab34934e4daefe25f88a22d77-556791783.ap-northeast-1.elb.amazonaws.com:8080/ordermgmts POST {"orderId": "1", "itemName": "ITbook", "qty": "3", "customerName": "HeidiCho", "deliveryAddress": "kyungkido sungnamsi", "deliveryPhoneNumber": "01012341234", "orderStatus": "orderTaken"}'
+```
+kubectl set image 명령어를 통해 배포를 수행하였다.
+![readiness2](https://user-images.githubusercontent.com/85722733/125286095-5a809180-e356-11eb-9bfb-a13f663478cf.png)
+
+siege 테스트 결과 연결시도 대비 성공률이 100% 로서 readinessProbe 옵션을 통해 무정지 배포를 확인하였다.
+![readiness3](https://user-images.githubusercontent.com/85722733/125286133-666c5380-e356-11eb-9d99-521f156426ce.png)
 
 ## ConfigMap
 
