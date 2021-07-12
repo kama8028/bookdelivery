@@ -18,11 +18,13 @@ Lv.2 Intensive Coursework Group 3
     - [폴리글랏 퍼시스턴스/프로그래밍](#폴리글랏-퍼시스턴스-프로그래밍)
     - [API 게이트웨이](#API-게이트웨이)
   - [운영](#운영)
-    - [CI/CD 설정](#cicd설정)
-    - [동기식 호출 / 서킷 브레이킹 / 장애격리](#동기식-호출-서킷-브레이킹-장애격리)
-    - [오토스케일 아웃](#오토스케일-아웃)
-    - [무정지 재배포](#무정지-재배포)
-  - [신규 개발 조직의 추가](#신규-개발-조직의-추가)
+    - [Deploy/Pipeline](#deploypipeline)
+    - [동기식 호출 / Circuit Breaker / 장애격리](#동기식-호출-Circuit-Breaker-장애격리)
+    - [Autoscale (HPA)](#Autoscale-(HPA))
+    - [Zero-downtime deploy (Readiness Probe)](#Zerodowntime-deploy-(Readiness-Probe))
+    - [ConfigMap](#ConfigMap)
+    - [Self-healing (Liveness Probe)](#Selfhealing-(Liveness-Probe))
+
 
 # 서비스 시나리오
 
@@ -299,10 +301,7 @@ public interface OrdermgmtRepository extends PagingAndSortingRepository<Ordermgm
 
 }
 ```
-- REST Inbound adaptor 이외에 gRPC 등의 Inbound Adaptor 를 추가함에 있어서 도메인 모델의 손상을 주지 않고 새로운 프로토콜에 기존 구현체를 적응시킬 수 있는가? 
-```
-미구현
-```
+
 
 - 분석단계에서의 유비쿼터스 랭귀지 (업무현장에서 쓰는 용어) 를 사용하여 소스코드가 서술되었는가?
 
@@ -947,11 +946,6 @@ Hibernate:
 추가필요
 ```
 
-- 각 마이크로 서비스들이 하나이상의 각자의 기술 Stack 으로 구성되었는가?
-```
-미구현
-```
-
 
 ## API 게이트웨이
 
@@ -1085,8 +1079,16 @@ http localhost:8088/ordermgmts "Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cC
 ![image](https://user-images.githubusercontent.com/78421066/125152033-30c44080-e185-11eb-902e-b9151c180b8c.png)
 
 # 운영
-## CI/CD 설정
-## 동기식 호출 / 서킷 브레이킹 / 장애격리
-## 오토스케일 아웃
-## 무정지 재배포
+## Deploy/Pipeline
+(CI/CD 설정)
 
+## 동기식 호출 / Circuit Breaker / 장애격리
+
+## Autoscale (HPA)
+
+## Zero-downtime deploy (Readiness Probe)
+(무정지 재배포)
+
+## ConfigMap
+
+## Self-healing (Liveness Probe)
