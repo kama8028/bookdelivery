@@ -87,6 +87,12 @@ phases:
                     image: $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/user03-final:$CODEBUILD_RESOLVED_SOURCE_VERSION
                     ports:
                       - containerPort: 8080
+                    env
+                      - name: namespacename
+                        valuefrom:
+                          configMapKeyRef:
+                            name: bookdelivery-config
+                            key: nsname
                     #readinessProbe:
                     #  httpGet:
                     #    path: /order
