@@ -68,6 +68,7 @@ phases:
           kind: Deployment
           metadata:
             name: $_PROJECT_NAME
+            namespace: bookdelivery
             labels:
               app: $_PROJECT_NAME
           spec:
@@ -88,8 +89,7 @@ phases:
                     ports:
                       - containerPort: 8080
                     env:
-                      #- name: namespacename
-                      - name: namespace
+                      - name: namespacename
                         valueFrom:
                           configMapKeyRef:
                             name: bookdelivery-config
