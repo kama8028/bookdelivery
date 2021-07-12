@@ -23,7 +23,6 @@ public class Payment {
 
     @PrePersist
     public void onPrePersist(){
-        System.out.println("========================TEST onPrePersist========================");
         try{
             Thread.currentThread().sleep((long) (400 + Math.random() * 220));
         } catch (InterruptedException e) {
@@ -33,17 +32,15 @@ public class Payment {
 
     @PostPersist
     public void onPostPersist(){
-        System.out.println("========================TEST onPostPersist========================");
-        PayApproved payApproved = new PayApproved();
-        BeanUtils.copyProperties(this, payApproved);
-        payApproved.publishAfterCommit();
-
-
+        if (this.orderStatus.equals("paid")) {
+            PayApproved payApproved = new PayApproved();
+            BeanUtils.copyProperties(this, payApproved);
+            payApproved.publishAfterCommit();
+        }
     }
 
     @PostUpdate
     public void onPostUpdate(){
-        System.out.println("========================TEST onPostUpdate========================");
         PayCanceled payCanceled = new PayCanceled();
         BeanUtils.copyProperties(this, payCanceled);
         payCanceled.publishAfterCommit();
