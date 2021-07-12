@@ -46,7 +46,8 @@ public class Order {
         payment.setItemPrice(orderPlaced.getItemPrice());
         payment.setDeliveryAddress(orderPlaced.getDeliveryAddress());
         payment.setDeliveryPhoneNumber(orderPlaced.getDeliveryPhoneNumber());
-        payment.setOrderStatus(orderPlaced.getOrderStatus());
+        // payment.setOrderStatus(orderPlaced.getOrderStatus());
+        payment.setOrderStatus("paid");
         OrderApplication.applicationContext.getBean(bookdelivery.external.PaymentService.class)
             .pay(payment);
 
