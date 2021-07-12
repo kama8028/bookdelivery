@@ -86,8 +86,7 @@ phases:
                       timeoutSeconds: 2
                       periodSeconds: 5
                       failureThreshold: 5
-          EOF
-      - |
+          EOF      
           cat <<EOF | kubectl apply -f -
           apiVersion: v1
           kind: Service
@@ -103,7 +102,8 @@ phases:
               app: $_PROJECT_NAME
             type:
               LoadBalancer
-          EOF      
+          EOF
+      - |
 cache:
   paths:
     - '/root/.m2/**/*'
