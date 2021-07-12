@@ -70,22 +70,22 @@ phases:
                     image: $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/user03-final:$CODEBUILD_RESOLVED_SOURCE_VERSION
                     ports:
                       - containerPort: 8080
-                    readinessProbe:
-                      httpGet:
-                        path: /gateway
-                        port: 8080
-                      initialDelaySeconds: 10
-                      timeoutSeconds: 2
-                      periodSeconds: 5
-                      failureThreshold: 10
-                    livenessProbe:
-                      httpGet:
-                        path: /gateway
-                        port: 8080
-                      initialDelaySeconds: 120
-                      timeoutSeconds: 2
-                      periodSeconds: 5
-                      failureThreshold: 5
+                   # readinessProbe:
+                   #   httpGet:
+                   #     path: /gateway
+                   #     port: 8080
+                   #   initialDelaySeconds: 10
+                   #   timeoutSeconds: 2
+                   #   periodSeconds: 5
+                   #   failureThreshold: 10
+                   # livenessProbe:
+                   #   httpGet:
+                   #     path: /gateway
+                   #     port: 8080
+                   #   initialDelaySeconds: 120
+                   #   timeoutSeconds: 2
+                   #   periodSeconds: 5
+                   #   failureThreshold: 5
           EOF
           cat <<EOF | kubectl apply -f -
           apiVersion: v1
