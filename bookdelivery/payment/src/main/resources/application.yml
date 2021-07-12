@@ -4,11 +4,6 @@ server:
 
 spring:
   profiles: default
-  datasource:
-    url: jdbc:mariadb://bookdelivery.cagxaoxiqqtw.ap-northeast-1.rds.amazonaws.com:3306/bookdelivery
-    driver-class-name: org.mariadb.jdbc.Driver
-    username: user03
-    password: skccuser03
   jpa:
     properties:
       hibernate:
