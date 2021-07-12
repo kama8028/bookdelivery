@@ -89,7 +89,7 @@ phases:
                       - containerPort: 8080
                     env
                       - name: namespacename
-                        valuefrom:
+                        valueFrom:
                           configMapKeyRef:
                             name: bookdelivery-config
                             key: nsname
