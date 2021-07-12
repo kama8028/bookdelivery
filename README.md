@@ -1172,6 +1172,28 @@ siege 테스트 결과 연결시도 대비 성공률이 100% 로서 readinessPro
 ![readiness3](https://user-images.githubusercontent.com/85722733/125286133-666c5380-e356-11eb-9d99-521f156426ce.png)
 
 ## ConfigMap
+ConfigMap
+컨피그맵을 통해 pod 생성 시 정해진 namespace로 deploy되도록 규칙 지정
+
+bookdelivery-config.yml
+
+ns 지정을 위한 config 적용
+
+![11](https://user-images.githubusercontent.com/60598148/125301625-1e552d00-e366-11eb-9040-753849bc443e.jpg)
+
+buildspec.yml에 namespacename 환경 변수에 위 컨피그 맵에서 정의한 nsname의 값을 설정한다.
+
+![10](https://user-images.githubusercontent.com/60598148/125292202-307e9d80-e35d-11eb-9e99-04f86f0e696f.jpg)
+
+bookdelivery 네임스페이스에 pod 정상 생성 확인
+
+![12](https://user-images.githubusercontent.com/60598148/125311615-80b22b80-e36e-11eb-87f2-52a8237e3b06.jpg)
+
+아래 명령어를 통해 pod 내부 환경 조회
+kubectl exec -it -n bookdelivery pod/payment-76bdcff94c-bmvml -- /bin/sh --bin/sh
+
+![13](https://user-images.githubusercontent.com/60598148/125311930-c8d14e00-e36e-11eb-9f1e-3d38994ae241.jpg)
+
 
 ## Self-healing (Liveness Probe)
 
