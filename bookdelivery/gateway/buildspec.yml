@@ -33,6 +33,7 @@ phases:
       - echo Building the Docker image...
       - mvn package -Dmaven.test.skip=true
       #- docker build -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$_PROJECT_NAME:$IMAGE_TAG  .
+      - docker pull ghcr.io/gkedu/openjdk:8u212-jdk-alpine  .
       - docker build -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/user03-final:$CODEBUILD_RESOLVED_SOURCE_VERSION  .
   post_build:
     commands:
