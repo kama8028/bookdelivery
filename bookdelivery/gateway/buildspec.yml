@@ -46,25 +46,7 @@ phases:
       - kubectl config set-credentials admin --token="$KUBE_TOKEN"
       - kubectl config set-context default --cluster=k8s --user=admin
       - kubectl config use-context default
-      - |
-          cat <<EOF | kubectl apply -f -
-          apiVersion: v1
-          kind: Service
-          metadata:
-            name: $_PROJECT_NAME
-            labels:
-              app: $_PROJECT_NAME
-          spec:
-            ports:
-              - port: 8080
-                targetPort: 8080
-            selector:
-              app: $_PROJECT_NAME
-            type:
-              LoadBalancer
-          EOF
-      - |
-          cat  <<EOF | kubectl apply -f -
+                cat  <<EOF | kubectl apply -f -
           apiVersion: apps/v1
           kind: Deployment
           metadata:
@@ -104,6 +86,24 @@ phases:
                       periodSeconds: 5
                       failureThreshold: 5
           EOF
+      - |
+          cat <<EOF | kubectl apply -f -
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: $_PROJECT_NAME
+            labels:
+              app: $_PROJECT_NAME
+          spec:
+            ports:
+              - port: 8080
+                targetPort: 8080
+            selector:
+              app: $_PROJECT_NAME
+            type:
+              LoadBalancer
+          EOF
+      - |
 cache:
   paths:
     - '/root/.m2/**/*'
