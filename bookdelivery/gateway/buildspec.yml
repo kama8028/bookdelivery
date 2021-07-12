@@ -23,6 +23,7 @@ phases:
       - echo $IMAGE_TAG
       - echo start command
       - $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
+      - docker login --username AWS -p $(aws ecr get-login-password --region ap-northeast-1) 879772956301.dkr.ecr.ap-northeast-1.amazonaws.com
       - echo $PWD
       - cd $REPOSITORY
       - echo $PWD      
