@@ -1142,3 +1142,43 @@ siege 테스트 결과 연결시도 대비 성공률이 100% 로서 readinessPro
 ## ConfigMap
 
 ## Self-healing (Liveness Probe)
+
+주문관리(Ordermanagement) 서비스의 배포 yaml 파일에 Pod 내 /tmp/healthy 파일을 5초마다 체크하도록 livenessProbe 옵션을 추가하였다
+
+```
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ordermanagement
+  labels:
+    app: ordermanagement
+spec:
+  containers:
+  - name: ordermanagement
+    image: 879772956301.dkr.ecr.ap-northeast-1.amazonaws.com/user03-ordermgmt:latest
+    livenessProbe:
+      exec:
+        command:
+        - cat 
+        - /tmp/healthy
+      initialDelaySeconds: 15
+      periodSeconds: 5
+```
+yaml 파일을 실행하여 주문관리 pod 가 생성되었다
+```
+]root@labs--679458944:/home/project# kubectl create -f test_liveness.yaml
+pod/ordermanagement created
+```
+![live0](https://user-images.githubusercontent.com/85722733/125304329-77be5b80-e368-11eb-8eeb-a2083a26552b.png)
+
+Pod 구동 시 Running 상태이나 Pod 내 체크 대상인 /tmp/healthy 파일이 없기 때문에 livenessProbe 옵션의 "Self-healing" 특징 대로 계속 Retry하여 Restart 된 것이 확인된다
+
+kubectl describe 명령어로 주문관리 Pod 상태 확인 시 livenessProbe 관련 실패 로그
+
+![live2](https://user-images.githubusercontent.com/85722733/125304502-9d4b6500-e368-11eb-80e3-4bce6f898fc7.png)
+
+주문관리 Pod 내부로 진입하여 touch 명령어를 통해 /tmp/healthy 파일 생성 시 Restart가 3번째에서 중단되고 Pod가 정상 동작함을 확인하였다 (2회 Fail 후 파일 생성되어 3번째에 성공)
+
+![live1](https://user-images.githubusercontent.com/85722733/125304569-ac321780-e368-11eb-8fc4-92ab83995d2a.png)
+
+![live3](https://user-images.githubusercontent.com/85722733/125304613-b3f1bc00-e368-11eb-9a8c-01a897ab7ccf.png)
