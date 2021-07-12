@@ -20,8 +20,8 @@ public class PolicyHandler{
         System.out.println("\n\n##### listener CancelPay : " + cancelOrderTaken.toJson() + "\n\n");
 
         // Logic //
-        Payment payment = new Payment();
-        paymentRepository.save(payment);
+        // Payment payment = new Payment();
+        // paymentRepository.save(payment);
         
         // Logic //결제취소로 업데이트해줘야 PayCanceled 이벤트 호출
         //Payment payment = new Payment();
@@ -29,10 +29,10 @@ public class PolicyHandler{
         //payment.setOrderStatus("payCanceled"); 
         //paymentRepository.save(payment);
 
-        // paymentRepository.findByOrderId(cancelOrderTaken.getOrderId()).ifPresent(ordermgmt->{
-        //     ordermgmt.setOrderStatus("orderFinallyCanceled");//add
-        //     paymentRepository.save(ordermgmt);
-        // });
+        paymentRepository.findByOrderId(cancelOrderTaken.getOrderId()).ifPresent(ordermgmt->{
+            ordermgmt.setOrderStatus("orderFinallyCanceled");//add
+            paymentRepository.save(ordermgmt);
+        });
     }
 
 
