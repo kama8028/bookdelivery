@@ -15,7 +15,7 @@ Lv.2 Intensive Coursework Group 3
     - [DDD 의 적용](#DDD-의-적용)
     - [동기식 호출과 Fallback 처리](#동기식-호출과-Fallback-처리)
     - [비동기식 호출과 Eventual Consistency](#비동기식-호출과-Eventual-Consistency)
-    - [폴리글랏 퍼시스턴스/프로그래밍](#폴리글랏-퍼시스턴스/프로그래밍)
+    - [폴리글랏 퍼시스턴스](#폴리글랏-퍼시스턴스)
     - [API 게이트웨이](#API-게이트웨이)
   - [운영](#운영)
     - [Deploy/Pipeline](#deploypipeline)
