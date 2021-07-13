@@ -15,7 +15,7 @@ Lv.2 Intensive Coursework Group 3
     - [DDD 의 적용](#DDD-의-적용)
     - [동기식 호출과 Fallback 처리](#동기식-호출과-Fallback-처리)
     - [비동기식 호출과 Eventual Consistency](#비동기식-호출과-Eventual-Consistency)
-    - [폴리글랏 퍼시스턴스/프로그래밍](#폴리글랏-퍼시스턴스-프로그래밍)
+    - [폴리글랏 퍼시스턴스/프로그래밍](#폴리글랏-퍼시스턴스/프로그래밍)
     - [API 게이트웨이](#API-게이트웨이)
   - [운영](#운영)
     - [Deploy/Pipeline](#deploypipeline)
@@ -940,11 +940,26 @@ Hibernate:
 
 
 ## 폴리글랏 퍼시스턴스/프로그래밍
-- 각 마이크로 서비스들이 각자의 저장소 구조를 자율적으로 채택하고 각자의 저장소 유형 (RDB, NoSQL, File System 등)을 선택하여 구현하였는가?
-```
-추가필요
-```
 
+- 각 마이크로 서비스들이 각자의 저장소 구조를 자율적으로 채택하고 각자의 저장소 유형 (RDB, NoSQL, File System 등)을 선택하여 구현하였는가?
+
+Payment 서비스의 경우 타 서비스들의 비해 안정성이 중요하다고 생각하였다. H2 DB의 경우 대규모 주문이 발생시 안정성과 성능이 아직은 부족하다고 생각했다. 그래서 안정성과 성능이 높은 DB와 경제성(라이센스 비용)에 강점이 있는 Maria DB를 선택하게 되었다.
+
+Payment서비스 pom.xml 의존성을 변경해 주었다.
+
+![image](https://user-images.githubusercontent.com/78421066/125373411-12965480-e3c0-11eb-83a1-ca712db9ae3e.png)
+
+application.yml 파일에 dababase 속성도 넣어주었다.
+
+![image](https://user-images.githubusercontent.com/78421066/125374405-ea0f5a00-e3c1-11eb-9ff4-23e8447013a5.png)
+
+aws RDS서비스를 이용하여 bookdelivery 데이터베이스를 생성하였다.
+
+![image](https://user-images.githubusercontent.com/78421066/125374606-52f6d200-e3c2-11eb-9f95-f86a936c2d33.png)
+
+로컬PC DBeaver를 이용하여 데이터베이스 및 테이블 생성을 확인하였다.
+
+![image](https://user-images.githubusercontent.com/78421066/125375108-6191b900-e3c3-11eb-9951-7d4d9f1c5d10.png)
 
 ## API 게이트웨이
 
