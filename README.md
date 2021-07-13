@@ -1114,8 +1114,35 @@ buildspec.yml 파일 내용
 
 
 ## 동기식 호출 / Circuit Breaker / 장애격리
+서킷 브레이킹 프레임워크의 선택: Spring FeignClient + Hystrix 옵션을 사용하여 구현함  
+오더 요청이 과도할 경우 서킷 브레이크를 통해 장애 격리를 하려고 한다. 
+
+Hystrix 를 설정: 요청처리 쓰레드에서 처리시간이 100 밀리가 넘어서기 시작하여 어느정도 유지되면 CB 회로가 닫히도록 (요청을 빠르게 실패처리, 차단) 설정  
+![image](https://user-images.githubusercontent.com/85722738/125285997-3c1a9600-e356-11eb-9c05-119e694a38c5.png)
+
+
+결제 서비스의 부하 처리 - 400 밀리에서 증감 220 밀리 정도 수준으로 설정  
+![image](https://user-images.githubusercontent.com/85722738/125285881-1ab9aa00-e356-11eb-9ed3-740c6e2bcafe.png)
+
+
+부하테스터 siege 툴을 통한 서킷 브레이커 동작 확인: 동시사용자 100명 60초 동안 실시  
+(테스트 후 수정필요. 현재 서킷 브레이커 동작하지않음)  
+![image](https://user-images.githubusercontent.com/85722738/125294018-e8f91100-e35e-11eb-8807-3d402cb6a5a8.png)
+
 
 ## Autoscale (HPA)
+주문 서비스에 HPA를 설정한다. 평균대비 CPU 20퍼 초과시 3개까지 pod 추가  
+![image](https://user-images.githubusercontent.com/85722738/125292390-60c63c00-e35d-11eb-8e39-f5597eeec376.png)
+
+현재 주문서비스 pod 상태 확인  
+![image](https://user-images.githubusercontent.com/85722738/125292058-06c57680-e35d-11eb-96c6-42da212b0306.png)
+
+siege 로 부하테스트를 진행  
+![image](https://user-images.githubusercontent.com/85722738/125292601-94a16180-e35d-11eb-980e-7427c462f7ca.png)
+
+아래와 같이 scale out 되는것을 확인할 수 있다.  
+![image](https://user-images.githubusercontent.com/85722738/125293099-0da0b900-e35e-11eb-91bc-72ab25ba08fe.png)
+
 
 ## Zero-downtime deploy (Readiness Probe)
 (무정지 배포)
