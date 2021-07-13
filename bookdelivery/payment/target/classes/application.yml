@@ -41,6 +41,11 @@ server:
 
 spring:
   profiles: docker
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver
+    url: jdbc:mariadb://bookdelivery.cagxaoxiqqtw.ap-northeast-1.rds.amazonaws.com:3306/bookdelivery
+    username: user03
+    password: skccuser03
   cloud:
     stream:
       kafka:
