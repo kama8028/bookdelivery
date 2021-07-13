@@ -1217,27 +1217,52 @@ siege 테스트 결과 연결시도 대비 성공률이 100% 로서 readinessPro
 ![readiness3](https://user-images.githubusercontent.com/85722733/125286133-666c5380-e356-11eb-9d99-521f156426ce.png)
 
 ## ConfigMap
-ConfigMap
-컨피그맵을 통해 pod 생성 시 정해진 namespace로 deploy되도록 규칙 지정
+운영환경에서 컨피그맵을 통해 pod 생성 시 정해진 kafka url 과 log 파일 설정(운영과 개발 분리)
 
 bookdelivery-config.yml
 
-ns 지정을 위한 config 적용
+![14](https://user-images.githubusercontent.com/60598148/125390104-3e740300-e3dd-11eb-9218-89f36a3416d2.jpg)
 
-![11](https://user-images.githubusercontent.com/60598148/125301625-1e552d00-e366-11eb-9040-753849bc443e.jpg)
+컨피그맵 생성 및 확인
 
-buildspec.yml에 namespacename 환경 변수에 위 컨피그 맵에서 정의한 nsname의 값을 설정한다.
+![15](https://user-images.githubusercontent.com/60598148/125390157-55b2f080-e3dd-11eb-8f69-1d426c0ed830.jpg)
 
-![10](https://user-images.githubusercontent.com/60598148/125292202-307e9d80-e35d-11eb-9e99-04f86f0e696f.jpg)
+deployment yaml 파일
 
-bookdelivery 네임스페이스에 pod 정상 생성 확인
+       - name: consumer
+          image: 052937454741.dkr.ecr.ap-northeast-2.amazonaws.com/lecture-consumer:latest 
+          env:
+          - name: KAFKA_URL
+            valueFrom:
+              configMapKeyRef:
+                name: kafka-config
+                key: KAFKA_URL
+          - name: LOG_FILE
+            valueFrom:
+              configMapKeyRef:
+                name: kafka-config
+                key: LOG_FILE
 
-![12](https://user-images.githubusercontent.com/60598148/125311615-80b22b80-e36e-11eb-87f2-52a8237e3b06.jpg)
+POD  생성 후 아래 명령어를 통해 pod 내부 환경 조회
+kubectl exec -it bookdelivery-nstest-deployment-6f976bf7df-kl5mz -- /bin/sh
 
-아래 명령어를 통해 pod 내부 환경 조회
-kubectl exec -it -n bookdelivery pod/payment-76bdcff94c-bmvml -- /bin/sh --bin/sh
+![16](https://user-images.githubusercontent.com/60598148/125390906-8d6e6800-e3de-11eb-81fa-7c04f21415c5.jpg)
 
-![13](https://user-images.githubusercontent.com/60598148/125311930-c8d14e00-e36e-11eb-9f1e-3d38994ae241.jpg)
+configmap value 정상 반영 확인됨
+
+프로그램(python) 파일 반영을 통해 kafka 로그 확인
+
+from kafka import KafkaConsumer
+from logging.config import dictConfig
+import logging
+import os
+
+kafka_url = os.getenv('KAFKA_URL')
+log_file = os.getenv('LOG_FILE')
+
+consumer = KafkaConsumer('lecture', bootstrap_servers=[
+                         kafka_url], auto_offset_reset='earliest', enable_auto_commit=True, group_id='alert')
+
 
 
 ## Self-healing (Liveness Probe)
