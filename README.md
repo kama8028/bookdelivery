@@ -1194,7 +1194,7 @@ spec:
           initialDelaySeconds: 10
           timeoutSeconds: 2
           periodSeconds: 5
-          failureThreshold: 10    
+          failureThreshold: 3    
 ```
 
 ```
