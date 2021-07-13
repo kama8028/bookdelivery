@@ -118,7 +118,7 @@ Lv.2 Intensive Coursework Group 3
 
 
 ## Event Storming 결과
-* MSAEz 로 모델링한 이벤트스토밍 결과:  http://www.msaez.io/#/storming/2WHhr58frxP61Pm7rSPRUu6bGAY2/mine/348fa7c90636e01a5525272b163ef307
+* MSAEz 로 모델링한 이벤트스토밍 결과:  http://www.msaez.io/#/storming/null/348fa7c90636e01a5525272b163ef307
 
 
 ### 이벤트 도출
