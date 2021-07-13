@@ -1173,7 +1173,7 @@ metadata:
   labels:
     app: ordermanagement
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: ordermanagement
@@ -1204,7 +1204,7 @@ deployment.apps/ordermanagement created
 ]root@labs--679458944:/home/project# kubectl expose deployment/ordermanagement
 service/ordermanagement exposed
 ```
-![readiness1](https://user-images.githubusercontent.com/85722733/125285104-40927f00-e355-11eb-914d-844aecd8bf02.png)
+![readiness](https://user-images.githubusercontent.com/85722733/125400678-273d1180-e3ed-11eb-854d-a7617b8aaa2b.png)
 
 siege 를 통해 100명의 가상의 유저가 30초동안 주문관리 서비스를 지속적으로 호출하게 함과 동시에
 ```
