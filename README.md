@@ -1141,8 +1141,8 @@ Hystrix 를 설정: 요청처리 쓰레드에서 처리시간이 100 밀리가 �
 
 
 부하테스터 siege 툴을 통한 서킷 브레이커 동작 확인: 동시사용자 100명 60초 동안 실시  
-(테스트 후 수정필요. 현재 서킷 브레이커 동작하지않음)  
-![image](https://user-images.githubusercontent.com/85722738/125294018-e8f91100-e35e-11eb-8807-3d402cb6a5a8.png)
+![image](https://user-images.githubusercontent.com/85722738/125383279-25198980-e3d2-11eb-948a-881c61c88a01.png)
+![image](https://user-images.githubusercontent.com/85722738/125383229-13d07d00-e3d2-11eb-81f9-425bdec581d5.png)
 
 
 ## Autoscale (HPA)
