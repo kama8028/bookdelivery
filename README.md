@@ -951,7 +951,7 @@ Payment서비스 pom.xml 의존성을 변경해 주었다.
 
 application.yml 파일에 dababase 속성도 넣어주었다.
 
-![image](https://user-images.githubusercontent.com/78421066/125374405-ea0f5a00-e3c1-11eb-9ff4-23e8447013a5.png)
+![image](https://user-images.githubusercontent.com/78421066/125383139-e8e62900-e3d1-11eb-868d-5637127f8c45.png)
 
 aws RDS서비스를 이용하여 bookdelivery 데이터베이스를 생성하였다.
 
