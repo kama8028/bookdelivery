@@ -19,11 +19,11 @@ Lv.2 Intensive Coursework Group 3
     - [API 게이트웨이](#API-게이트웨이)
   - [운영](#운영)
     - [Deploy/Pipeline](#deploypipeline)
-    - [동기식 호출 / Circuit Breaker / 장애격리](#동기식-호출-Circuit-Breaker-장애격리)
+    - [동기식 호출 / Circuit Breaker / 장애격리](#동기식-호출-circuit-breaker-장애격리)
     - [Autoscale (HPA)](#Autoscale-(HPA))
     - [Zero-downtime deploy (Readiness Probe)](#Zerodowntime-deploy-(Readiness-Probe))
     - [ConfigMap](#ConfigMap)
-    - [Self-healing (Liveness Probe)](#Selfhealing-(Liveness-Probe))
+    - [Self-healing (Liveness Probe)](#self-healing-(liveness-probe))
 
 
 # 서비스 시나리오
